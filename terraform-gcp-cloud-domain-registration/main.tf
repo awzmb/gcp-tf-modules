@@ -9,6 +9,15 @@ terraform {
   }
 }
 
+data "google_project" "project" {
+}
+
+resource "google_project_service" "domain" {
+  service            = "domains.googleapis.com"
+  disable_on_destroy = false
+  project            = data.google_project.project.number
+}
+
 resource "google_clouddomains_registration" "registration" {
   domain_name = var.domain_name
   location    = "global"

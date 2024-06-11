@@ -18,10 +18,17 @@ resource "random_id" "suffix" {
   byte_length = 2
 }
 
+#data "google_billing_account" "biling_account" {
+#display_name = "General billing account"
+#open         = true
+#}
+
 resource "google_project" "project" {
-  name            = var.display_name
-  project_id      = "${var.project_id}-${random_id.suffix.hex}"
+  name       = var.display_name
+  project_id = "${var.project_id}-${random_id.suffix.hex}"
+
   billing_account = var.billing_account_id
+  #billing_account = data.google_billing_account.billing_account.id
 
   auto_create_network = true
 }
