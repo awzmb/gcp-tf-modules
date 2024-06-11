@@ -34,6 +34,16 @@ variable "region_code" {
   }
 }
 
+variable "contact_name" {
+  description = "Full name of the primary contact."
+  type        = string
+}
+
+variable "organization" {
+  description = "Registrant contact organization."
+  type        = string
+}
+
 variable "organization" {
   description = "Registrant contact organization."
   type        = string

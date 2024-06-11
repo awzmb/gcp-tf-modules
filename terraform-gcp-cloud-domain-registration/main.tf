@@ -49,6 +49,8 @@ resource "google_clouddomains_registration" "registration" {
       email        = var.email_address
 
       postal_address {
+        recipients          = [var.contact_name]
+        organization        = var.organization
         region_code         = var.region_code
         postal_code         = var.postal_code
         administrative_area = var.administrative_area
@@ -62,6 +64,8 @@ resource "google_clouddomains_registration" "registration" {
       email        = var.email_address
 
       postal_address {
+        recipients          = [var.contact_name]
+        organization        = var.organization
         region_code         = var.region_code
         postal_code         = var.postal_code
         administrative_area = var.administrative_area
@@ -75,6 +79,8 @@ resource "google_clouddomains_registration" "registration" {
       email        = var.email_address
 
       postal_address {
+        recipients          = [var.contact_name]
+        organization        = var.organization
         region_code         = var.region_code
         postal_code         = var.postal_code
         administrative_area = var.administrative_area
