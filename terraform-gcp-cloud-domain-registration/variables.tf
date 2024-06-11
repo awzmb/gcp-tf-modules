@@ -44,11 +44,6 @@ variable "organization" {
   type        = string
 }
 
-variable "organization" {
-  description = "Registrant contact organization."
-  type        = string
-}
-
 variable "postal_code" {
   description = "Registrant contact postal code."
   type        = string
