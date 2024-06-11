@@ -22,6 +22,9 @@ resource "google_clouddomains_registration" "registration" {
   domain_name = var.domain_name
   location    = "global"
 
+  domain_notices = "HSTS_PRELOADED"
+  #domain_notices = "DOMAIN_NOTICE_UNSPECIFIED"
+
   yearly_price {
     currency_code = var.pricing_currency_code
     units         = var.pricing_yearly_price
