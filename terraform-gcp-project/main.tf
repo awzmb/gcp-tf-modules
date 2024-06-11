@@ -15,14 +15,14 @@ terraform {
 }
 
 resource "random_id" "suffix" {
-  byte_length = 4
+  byte_length = 2
 }
 
 resource "google_project" "project" {
   #checkov:skip=CKV2_GCP_5:not a professional setup
   #checkov:skip=CKV_GCP_27:not a professional setup
   name       = var.display_name
-  project_id = "${var.project_id}-${random_id.suffix}"
+  project_id = "${var.project_id}-${random_id.suffix.hex}"
 
   auto_create_network = true
 }
