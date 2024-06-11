@@ -90,6 +90,12 @@ resource "google_clouddomains_registration" "registration" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [
+      dns_settings
+    ]
+  }
+
   depends_on = [
     google_project_service.domain
   ]
