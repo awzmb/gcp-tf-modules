@@ -35,16 +35,16 @@ resource "google_artifact_registry_repository" "repository" {
 
   #repository_id = "${replace(var.site, ".", "-")}--repository"
 
-  cleanup_policies {
-    id     = "delete-dev-releases"
-    action = "DELETE"
+  #cleanup_policies {
+  #id     = "delete-dev-releases"
+  #action = "DELETE"
 
-    condition {
-      tag_state    = "TAGGED"
-      tag_prefixes = ["dev"]
-      older_than   = "2592000s"
-    }
-  }
+  #condition {
+  #tag_state    = "TAGGED"
+  #tag_prefixes = ["dev"]
+  #older_than   = "2592000s"
+  #}
+  #}
 
   cleanup_policies {
     id     = "keep-minimum-versions"
@@ -55,15 +55,15 @@ resource "google_artifact_registry_repository" "repository" {
     }
   }
 
-  cleanup_policies {
-    id     = "keep-tagged-release"
-    action = "KEEP"
+  #cleanup_policies {
+  #id     = "keep-tagged-release"
+  #action = "KEEP"
 
-    condition {
-      tag_state    = "TAGGED"
-      tag_prefixes = ["release"]
-    }
-  }
+  #condition {
+  #tag_state    = "TAGGED"
+  #tag_prefixes = ["release"]
+  #}
+  #}
 
   depends_on = [
     #google_kms_crypto_key_iam_member.crypto_key,
