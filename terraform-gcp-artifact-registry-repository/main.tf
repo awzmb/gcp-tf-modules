@@ -20,4 +20,14 @@ module "artifact_registry" {
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
+
+  cleanup_policies = {
+    condition = {
+      tag_prefixes = ["release", "dev"]
+    }
+
+    most_recent_versions = {
+      keep_count = 10
+    }
+  }
 }
