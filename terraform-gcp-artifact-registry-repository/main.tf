@@ -27,7 +27,7 @@ resource "google_project_service" "enable_artifact_registry" {
 resource "google_artifact_registry_repository" "repository" {
   description = "${var.format} artifact repository."
 
-  project       = data.google_project.project.id
+  project       = data.google_project.project.number
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
