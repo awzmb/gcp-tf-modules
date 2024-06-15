@@ -13,8 +13,8 @@ data "google_project" "project" {
 }
 
 module "artifact_registry" {
-  source  = "GoogleCloudPlatform/artifact-registry/google"
-  version = "~> 0.2"
+  #version = 0.2.0
+  source = "git::https://github.com/googlecloudplatform/terraform-google-artifact-registry?ref=b16d7c7d95c12d59a6d1e70e2162bd0260b99676"
 
   project_id    = data.google_project.project.number
   location      = var.location
