@@ -12,10 +12,6 @@ terraform {
 data "google_project" "project" {
 }
 
-data "google_projects" "projects" {
-  filter = "id: ${data.google_project.project.number}"
-}
-
 resource "google_project_service" "enable_artifact_registry" {
   service            = "artifactregistry.googleapis.com"
   disable_on_destroy = false
@@ -31,7 +27,7 @@ resource "google_project_service" "enable_artifact_registry" {
 resource "google_artifact_registry_repository" "repository" {
   description = "${var.format} artifact repository."
 
-  project       = data.google_projects.projects[0].project_id
+  project       = data.google_project.project.project_id
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
