@@ -12,32 +12,62 @@ terraform {
 data "google_project" "project" {
 }
 
-resource "google_project_service" "artifact_registry" {
+resource "google_project_service" "enable_artifact_registry" {
   service            = "artifactregistry.googleapis.com"
   disable_on_destroy = false
   project            = data.google_project.project.number
 }
 
-module "artifact_registry" {
-  #version = 0.2.0
-  source = "git::https://github.com/googlecloudplatform/terraform-google-artifact-registry?ref=b16d7c7d95c12d59a6d1e70e2162bd0260b99676"
+#resource "google_kms_crypto_key_iam_member" "crypto_key" {
+#crypto_key_id = "${var.location}-${var.repository_id}-encryption-key"
+#role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+#member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+#}
 
-  project_id    = data.google_project.project.number
+resource "google_artifact_registry_repository" "repository" {
+  description = "${var.format} artifact repository."
+
+  project       = data.google_project.project.number
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
+  #kms_key_name  = "${var.location}-${var.repository_id}-encryption-key"
 
-  cleanup_policies = {
-    condition = {
-      tag_prefixes = ["release", "dev"]
+  #repository_id = "${replace(var.site, ".", "-")}--repository"
+
+  cleanup_policies {
+    id     = "delete-dev-releases"
+    action = "DELETE"
+
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["dev"]
+      older_than   = "2592000s"
     }
+  }
 
-    most_recent_versions = {
-      keep_count = 10
+  cleanup_policies {
+    id     = "keep-minimum-versions"
+    action = "KEEP"
+
+    most_recent_versions {
+      keep_count = 3
+    }
+  }
+
+  cleanup_policies {
+    id     = "keep-tagged-release"
+    action = "KEEP"
+
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["release"]
     }
   }
 
   depends_on = [
-    google_project_service.artifact_registry
+    #google_kms_crypto_key_iam_member.crypto_key,
+    google_project_service.enable_artifact_registry
   ]
 }
+
