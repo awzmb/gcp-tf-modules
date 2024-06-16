@@ -32,3 +32,9 @@ resource "google_project" "project" {
 
   auto_create_network = true
 }
+
+resource "google_project_service" "enable_compute_api" {
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
+  project            = data.google_project.project.number
+}
