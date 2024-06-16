@@ -14,6 +14,14 @@ terraform {
   }
 }
 
+locals {
+  google_apis_to_enable = [
+    "container.googleapis.com",
+    "compute.googleapis.com",
+    "monitoring.googleapis.com"
+  ]
+}
+
 resource "random_id" "suffix" {
   byte_length = 2
 }
@@ -33,8 +41,9 @@ resource "google_project" "project" {
   auto_create_network = true
 }
 
-resource "google_project_service" "enable_compute_api" {
-  service            = "compute.googleapis.com"
+resource "google_project_service" "enable_selected_apis" {
+  for_each           = toset(local.google_apis_to_enable)
+  service            = each.key
   disable_on_destroy = false
   project            = google_project.project.project_id
 }
