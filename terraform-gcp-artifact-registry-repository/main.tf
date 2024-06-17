@@ -28,7 +28,7 @@ resource "google_artifact_registry_repository" "repository" {
   #checkov:skip=CKV_GCP_84:not necessary at the moment
   description = "${var.format} artifact repository."
 
-  project       = data.google_project.project
+  project       = data.google_project.project.name
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
