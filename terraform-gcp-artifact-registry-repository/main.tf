@@ -28,7 +28,7 @@ resource "google_artifact_registry_repository" "repository" {
   #checkov:skip=CKV_GCP_84:not necessary at the moment
   description = "${var.format} artifact repository."
 
-  project       = data.google_project.project.project_id
+  #project       = data.google_project.project.project_id
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
@@ -38,16 +38,16 @@ resource "google_artifact_registry_repository" "repository" {
   #kms_key_name  = "${var.location}-${var.repository_id}-encryption-key"
   #repository_id = "${replace(var.site, ".", "-")}--repository"
 
-  #cleanup_policies {
-  #id     = "delete-dev-releases"
-  #action = "DELETE"
+  cleanup_policies {
+    id     = "delete-dev-releases"
+    action = "DELETE"
 
-  #condition {
-  #tag_state    = "TAGGED"
-  #tag_prefixes = ["dev"]
-  #older_than   = "2592000s"
-  #}
-  #}
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["dev"]
+      older_than   = "2592000s"
+    }
+  }
 
   cleanup_policies {
     id     = "keep-minimum-versions"
@@ -58,15 +58,15 @@ resource "google_artifact_registry_repository" "repository" {
     }
   }
 
-  #cleanup_policies {
-  #id     = "keep-tagged-release"
-  #action = "KEEP"
+  cleanup_policies {
+    id     = "keep-tagged-release"
+    action = "KEEP"
 
-  #condition {
-  #tag_state    = "TAGGED"
-  #tag_prefixes = ["release"]
-  #}
-  #}
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["release"]
+    }
+  }
 
   depends_on = [
     #google_kms_crypto_key_iam_member.crypto_key,
