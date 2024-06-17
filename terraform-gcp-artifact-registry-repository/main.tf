@@ -28,12 +28,14 @@ resource "google_artifact_registry_repository" "repository" {
   #checkov:skip=CKV_GCP_84:not necessary at the moment
   description = "${var.format} artifact repository."
 
-  project       = data.google_project.project.id
+  project       = data.google_project.project
   location      = var.location
   format        = var.format
   repository_id = var.repository_id
-  #kms_key_name  = "${var.location}-${var.repository_id}-encryption-key"
 
+  cleanup_policy_dry_run = true
+
+  #kms_key_name  = "${var.location}-${var.repository_id}-encryption-key"
   #repository_id = "${replace(var.site, ".", "-")}--repository"
 
   #cleanup_policies {
