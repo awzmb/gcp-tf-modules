@@ -10,7 +10,7 @@ output "name" {
 
 output "project_id" {
   description = "Project ID"
-  value       = data.google_project.project.number
+  value       = data.google_project.project.project_id
 }
 
 output "repo_location" {
