@@ -3,6 +3,11 @@ variable "repository_id" {
   type        = string
 }
 
+variable "project_id" {
+  description = "The alphanumerical project Id (not number)."
+  type        = string
+}
+
 variable "location" {
   description = "The name of the location this repository is located in."
   type        = string
