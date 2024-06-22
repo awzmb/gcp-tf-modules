@@ -1,8 +1,7 @@
 locals {
   gke_cluster_name = "gke-${var.name}"
 
-  #istio_version          = "1.22.1"
-  istio_version = "latest"
+  istio_version = "1.22.1"
 
   internal_subnet_cidr   = "10.0.0.0/24"
   master_ipv4_cidr_block = "172.16.0.16/28"

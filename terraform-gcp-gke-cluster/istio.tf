@@ -4,10 +4,13 @@ resource "helm_release" "istio_base" {
   chart      = "base"
   version    = local.istio_version
 
-  namespace        = "istio-system"
-  create_namespace = true
-  wait_for_jobs    = true
-  atomic           = true
+  namespace = "istio-system"
+
+  dependency_update = true
+  create_namespace  = true
+  wait_for_jobs     = true
+  atomic            = true
+
   #values = [
   #file("istio-values.yaml")
   #]
@@ -24,9 +27,11 @@ resource "helm_release" "istiod" {
   chart      = "istiod"
   version    = local.istio_version
 
-  namespace        = "istio-system"
-  create_namespace = true
-  wait_for_jobs    = true
+  namespace = "istio-system"
+
+  dependency_update = true
+  create_namespace  = true
+  wait_for_jobs     = true
 
   set {
     name  = "global.proxy.image"
@@ -49,9 +54,11 @@ resource "helm_release" "istio_gateway" {
   chart      = "gateway"
   version    = local.istio_version
 
-  namespace        = "istio-system"
-  create_namespace = true
-  wait_for_jobs    = true
+  namespace = "istio-system"
+
+  dependency_update = true
+  create_namespace  = true
+  wait_for_jobs     = true
 
   depends_on = [
     helm_release.istiod
