@@ -17,9 +17,6 @@ resource "google_compute_subnetwork" "proxy" {
   region        = var.region
   network       = google_compute_network.default.id
 
-  private_ip_google_access   = true
-  private_ipv6_google_access = true
-
   purpose = "REGIONAL_MANAGED_PROXY"
   role    = "ACTIVE"
 
