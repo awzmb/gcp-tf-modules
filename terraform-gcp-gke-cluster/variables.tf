@@ -13,11 +13,6 @@ variable "region" {
   type        = string
 }
 
-variable "zone" {
-  description = "The zone to host the cluster in (required if is a zonal cluster)"
-  type        = string
-}
-
 variable "network_name" {
   description = "The name of the network"
   type        = string

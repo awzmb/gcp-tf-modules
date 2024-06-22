@@ -68,7 +68,7 @@ resource "google_container_cluster" "default" {
   provider           = google-beta
   project            = var.project_id
   name               = local.gke_cluster_name
-  location           = var.zone
+  location           = var.region
   initial_node_count = var.num_nodes
   # More info on the VPC native cluster: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg#create_a-native_cluster
   networking_mode = "VPC_NATIVE"
