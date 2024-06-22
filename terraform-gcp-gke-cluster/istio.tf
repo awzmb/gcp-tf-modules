@@ -4,6 +4,8 @@ resource "helm_release" "istio_base" {
   chart      = "base"
   version    = local.istio_version
 
+  create_namespace = true
+
   #values = [
   #file("istio-values.yaml")
   #]
@@ -19,6 +21,8 @@ resource "helm_release" "istiod" {
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "istiod"
   version    = local.istio_version
+
+  create_namespace = true
 
   set {
     name  = "global.proxy.image"
@@ -40,6 +44,8 @@ resource "helm_release" "istio_gateway" {
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
   version    = local.istio_version
+
+  create_namespace = true
 
   depends_on = [
     helm_release.istiod
