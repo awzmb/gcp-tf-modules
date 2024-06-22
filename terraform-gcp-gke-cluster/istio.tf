@@ -5,7 +5,7 @@ resource "helm_release" "istio_base" {
   version    = local.istio_version
 
   create_namespace = true
-
+  wait_for_jobs    = true
   #values = [
   #file("istio-values.yaml")
   #]
@@ -23,6 +23,7 @@ resource "helm_release" "istiod" {
   version    = local.istio_version
 
   create_namespace = true
+  wait_for_jobs    = true
 
   set {
     name  = "global.proxy.image"
@@ -46,6 +47,7 @@ resource "helm_release" "istio_gateway" {
   version    = local.istio_version
 
   create_namespace = true
+  wait_for_jobs    = true
 
   depends_on = [
     helm_release.istiod
