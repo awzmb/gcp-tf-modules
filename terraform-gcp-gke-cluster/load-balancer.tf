@@ -66,7 +66,7 @@ resource "google_compute_region_backend_service" "default" {
 
   # this cannot be deployed until the ingress gateway is deployed and the standalone neg is automatically created
   depends_on = [
-    helm_release.istio
+    helm_release.istio_gateway
   ]
 }
 
