@@ -34,7 +34,7 @@ data "google_project" "project" {}
 data "google_client_config" "default" {}
 
 resource "google_compute_network" "default" {
-  name = var.network_name
+  name = "${local.gke_cluster_name}-network"
 
   auto_create_subnetworks = "false"
   project                 = data.google_project.project.project_id

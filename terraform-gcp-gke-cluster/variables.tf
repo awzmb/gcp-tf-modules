@@ -13,11 +13,6 @@ variable "region" {
   type        = string
 }
 
-variable "network_name" {
-  description = "The name of the network"
-  type        = string
-}
-
 variable "num_nodes" {
   description = "The number of cluster nodes"
   type        = number
@@ -27,6 +22,7 @@ variable "num_nodes" {
 variable "machine_type" {
   description = "The machine type of the cluster nodes"
   type        = string
+  default     = "e2-standard-2"
 }
 
 variable "disk_size" {
