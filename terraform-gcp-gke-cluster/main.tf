@@ -92,7 +92,7 @@ resource "google_container_cluster" "default" {
   logging_service = "none"
 
   node_config {
-    # More info on Spot VMs with GKE https://cloud.google.com/kubernetes-engine/docs/how-to/spot-vms#create_a_cluster_with_enabled
+    # more info on spot vms with gke https://cloud.google.com/kubernetes-engine/docs/how-to/spot-vms#create_a_cluster_with_enabled
     spot         = true
     machine_type = var.machine_type
     disk_size_gb = var.disk_size
@@ -109,15 +109,15 @@ resource "google_container_cluster" "default" {
 
   addons_config {
     http_load_balancing {
-      # This needs to be enabled for the NEG to be automatically created for the ingress gateway svc
+      # this needs to be enabled for the neg to be automatically created for the ingress gateway svc
       disabled = false
     }
   }
 
   private_cluster_config {
-    # Need to use private nodes for VPC-native GKE clusters
+    # need to use private nodes for vpc-native gke clusters
     enable_private_nodes = true
-    # Allow private cluster Master to be accessible outside of the network
+    # allow private cluster master to be accessible outside of the network
     enable_private_endpoint = false
     master_ipv4_cidr_block  = local.master_ipv4_cidr_block
   }
@@ -128,8 +128,8 @@ resource "google_container_cluster" "default" {
   }
 
   default_snat_status {
-    # More info on why sNAT needs to be disabled: https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips#enable_pupis
-    # This applies to VPC-native GKE clusters
+    # more info on why snat needs to be disabled: https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips#enable_pupis
+    # this applies to vpc-native gke clusters
     disabled = true
   }
 
@@ -152,7 +152,7 @@ resource "null_resource" "local_k8s_context" {
   depends_on = [time_sleep.wait_for_kube]
   provisioner "local-exec" {
     # Update your local gcloud and kubectl credentials for the newly created cluster
-    command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --zone=${var.zone} && break || sleep 60; done"
+    command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --region=${var.region} && break || sleep 60; done"
   }
 }
 

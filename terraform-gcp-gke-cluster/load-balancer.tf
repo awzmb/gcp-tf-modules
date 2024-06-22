@@ -1,5 +1,5 @@
 # This solution deploys a Regional External HTTP Load Balancer that routes traffic from the Internet to
-# the ingress gateway for the GKE Cluster. The Regional External HTTP Load Balancer uses Envoy as a 
+# the ingress gateway for the GKE Cluster. The Regional External HTTP Load Balancer uses Envoy as a
 # managed proxy deployment. More information on the Regional External HTTP Load Balancer can be found here:
 # https://cloud.google.com/load-balancing/docs/https#regional-connections
 
@@ -40,14 +40,14 @@ resource "google_compute_region_backend_service" "default" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
   health_checks         = [google_compute_region_health_check.default.id]
 
-  backend {
-    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.zone}/networkEndpointGroups/ingressgateway"
-    capacity_scaler = 1
-    balancing_mode  = "RATE"
+  #backend {
+  #group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/region/${var.region}/networkEndpointGroups/ingressgateway"
+  #capacity_scaler = 1
+  #balancing_mode  = "RATE"
 
-    # this is a reasonable max rate for an envoy proxy
-    max_rate_per_endpoint = 3500
-  }
+  ## this is a reasonable max rate for an envoy proxy
+  #max_rate_per_endpoint = 3500
+  #}
 
   circuit_breakers {
     max_retries = 5
