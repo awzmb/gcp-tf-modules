@@ -33,21 +33,27 @@ resource "helm_release" "istiod" {
   create_namespace  = true
   wait_for_jobs     = true
 
-  set {
-    name  = "global.proxy.image"
-    value = "auto"
-  }
-
-  set {
-    name  = "global.controlPlaneSecurityEnabled"
-    value = "true"
-  }
-
   depends_on = [
     helm_release.istio_base
   ]
 }
 
+resource "helm_release" "istio_cni" {
+  name       = "istio-cni"
+  repository = "https://istio-release.storage.googleapis.com/charts"
+  chart      = "cni"
+  version    = local.istio_version
+
+  namespace = "istio-system"
+
+  dependency_update = true
+  create_namespace  = true
+  wait_for_jobs     = true
+
+  depends_on = [
+    helm_release.istiod
+  ]
+}
 resource "helm_release" "istio_gateway" {
   name       = "istio-gateway"
   repository = "https://istio-release.storage.googleapis.com/charts"
@@ -60,7 +66,22 @@ resource "helm_release" "istio_gateway" {
   create_namespace  = true
   wait_for_jobs     = true
 
+  set {
+    name  = "revision"
+    value = replace(local.istio_version, ".", "-")
+  }
+
+  set {
+    name  = "global.proxy.image"
+    value = "auto"
+  }
+
+  set {
+    name  = "global.controlPlaneSecurityEnabled"
+    value = "true"
+  }
+
   depends_on = [
-    helm_release.istiod
+    helm_release.istio_cni
   ]
 }
