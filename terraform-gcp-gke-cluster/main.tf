@@ -140,6 +140,8 @@ resource "google_container_cluster" "default" {
       display_name = "World"
     }
   }
+
+  deletion_protection = false
 }
 
 resource "time_sleep" "wait_for_kube" {
