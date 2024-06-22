@@ -70,14 +70,6 @@ resource "google_compute_region_backend_service" "default" {
   ]
 }
 
-resource "null_resource" "delete_ingressgateway" {
-  provisioner "local-exec" {
-    when = destroy
-    # Delete ingressgateway on destroy
-    command = "gcloud compute network-endpoint-groups delete ingressgateway --quiet"
-  }
-}
-
 # https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_region_health_check
 resource "google_compute_region_health_check" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
