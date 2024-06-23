@@ -87,7 +87,7 @@ resource "google_container_cluster" "default" {
 
   # enable cilium. if you want to use calico, enter
   # LEGACY_DATAPATH instead
-  datapath_provider = ADVANCED_DATAPATH
+  datapath_provider = "ADVANCED_DATAPATH"
 
   networking_mode = "VPC_NATIVE"
   network         = google_compute_network.default.name
