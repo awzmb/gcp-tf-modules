@@ -81,10 +81,6 @@ service:
   externalIPs: []
 labels:
   istio: private-ingressgateway
-
-image:
-  repository: docker.io/istio/proxyv2
-  tag: ${local.istio_version}
 EOF
   ]
 
@@ -94,8 +90,18 @@ EOF
   }
 
   set {
-    name  = "global.proxy.image"
-    value = "proxyv2"
+    name  = "image.repository"
+    value = "gcr.io/istio-release/proxyv2"
+  }
+
+  set {
+    name  = "image.tag"
+    value = local.istio_ingress_gateway_endpoint_group
+  }
+
+  set {
+    name  = "image.pullPolicy"
+    value = "IfNotPresent"
   }
 
   set {
