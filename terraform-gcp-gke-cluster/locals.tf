@@ -10,6 +10,9 @@ locals {
   cluster_ipv4_cidr_block  = "5.0.0.0/16"
   services_ipv4_cidr_block = "5.1.0.0/16"
 
+
+  istio_ingress_gateway_endpoint_group = "private-istio-ingress-gateway"
+
   istio_ingress_gateway_values = <<EOF
 ---
 service:
@@ -28,7 +31,7 @@ service:
       protocol: TCP
       targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "private-istio-ingress-gateway"}}}'
+    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group}'
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
   externalTrafficPolicy: ""
