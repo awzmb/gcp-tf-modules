@@ -40,14 +40,14 @@ resource "google_compute_backend_service" "default" {
     google_compute_region_health_check.default.id
   ]
 
-  backend {
-    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/region/${var.region}/networkEndpointGroups/ingressgateway"
-    capacity_scaler = 1
-    balancing_mode  = "RATE"
+  #backend {
+  #group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/region/${var.region}/networkEndpointGroups/ingressgateway"
+  #capacity_scaler = 1
+  #balancing_mode  = "RATE"
 
-    # this is a reasonable max rate for an envoy proxy
-    max_rate_per_endpoint = 3500
-  }
+  ## this is a reasonable max rate for an envoy proxy
+  #max_rate_per_endpoint = 3500
+  #}
 
   circuit_breakers {
     max_retries = 5
