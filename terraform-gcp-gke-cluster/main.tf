@@ -58,7 +58,7 @@ resource "google_compute_network" "default" {
   auto_create_subnetworks = "false"
   project                 = data.google_project.project.project_id
 
-  # Everything in this solution is deployed regionally
+  # everything in this solution is deployed regionally
   routing_mode = "REGIONAL"
 }
 
