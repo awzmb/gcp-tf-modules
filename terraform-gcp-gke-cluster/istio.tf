@@ -81,6 +81,10 @@ service:
   externalIPs: []
 labels:
   istio: private-ingressgateway
+
+image:
+  repository: docker.io/istio/proxyv2
+  tag: ${local.istio_version}
 EOF
   ]
 
