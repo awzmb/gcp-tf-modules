@@ -26,6 +26,11 @@ terraform {
       source  = "hashicorp/time"
       version = "> 0.10"
     }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.30.0, < 3"
+    }
   }
 }
 
@@ -33,14 +38,14 @@ terraform {
 provider "kubernetes" {
   host                   = google_container_cluster.default.endpoint
   token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth.0.cluster_ca_certificate)
+  cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
 }
 
 provider "helm" {
   kubernetes {
     host                   = google_container_cluster.default.endpoint
     token                  = data.google_client_config.default.access_token
-    cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth.0.cluster_ca_certificate)
+    cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth[0].cluster_ca_certificate)
   }
 }
 data "google_project" "project" {}
