@@ -48,7 +48,6 @@ provider "helm" {
     cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth[0].cluster_ca_certificate)
   }
 }
-data "google_project" "project" {}
 
 data "google_client_config" "default" {}
 
@@ -56,7 +55,7 @@ resource "google_compute_network" "default" {
   name = "${local.gke_cluster_name}-network"
 
   auto_create_subnetworks = "false"
-  project                 = data.google_project.project.project_id
+  project                 = var.project_id
 
   # everything in this solution is deployed regionally
   routing_mode = "REGIONAL"
@@ -102,18 +101,11 @@ resource "google_container_cluster" "default" {
     # spot instances to decreste pricing to a minimum (when using in production
     # use at minimum 9 nodes and make sure your important deployments have enough
     # pods distributed over those nodes)
-    spot         = true
-    machine_type = var.machine_type
-    disk_size_gb = var.disk_size
-    tags         = [local.gke_cluster_name]
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform",
-      "https://www.googleapis.com/auth/trace.append",
-      "https://www.googleapis.com/auth/service.management.readonly",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/servicecontrol",
-    ]
+    spot            = true
+    machine_type    = var.machine_type
+    disk_size_gb    = var.disk_size
+    tags            = [local.gke_cluster_name]
+    service_account = google_service_account.gke_node.email
   }
 
   release_channel {
@@ -125,7 +117,7 @@ resource "google_container_cluster" "default" {
   #}
 
   workload_identity_config {
-    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${var.project_id}.svc.id.goog"
   }
 
   addons_config {
