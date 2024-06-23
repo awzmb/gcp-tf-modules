@@ -10,4 +10,30 @@ locals {
   cluster_ipv4_cidr_block  = "5.0.0.0/16"
   services_ipv4_cidr_block = "5.1.0.0/16"
 
+  istio_ingress_gateway_values = <<EOF
+---
+service:
+  type: ClusterIP
+  ports:
+    - name: status-port
+      port: 15021
+      protocol: TCP
+      targetPort: 15021
+    - name: http2
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  annotations:
+    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "private-istio-ingress-gateway"}}}'
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy: ""
+  externalIPs: []
+labels:
+  istio: private-ingressgateway
+EOF
 }

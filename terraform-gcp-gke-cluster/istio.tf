@@ -42,25 +42,6 @@ resource "helm_release" "istiod" {
   ]
 }
 
-resource "helm_release" "istio_cni" {
-  count = var.enable_istio ? 1 : 0
-
-  name       = "istio-cni"
-  repository = "https://istio-release.storage.googleapis.com/charts"
-  chart      = "cni"
-  version    = local.istio_version
-
-  namespace = "istio-system"
-
-  dependency_update = true
-  create_namespace  = true
-  wait_for_jobs     = true
-
-  depends_on = [
-    helm_release.istiod
-  ]
-}
-
 resource "helm_release" "istio_gateway" {
   count = var.enable_istio ? 1 : 0
 
@@ -69,11 +50,15 @@ resource "helm_release" "istio_gateway" {
   chart      = "gateway"
   version    = local.istio_version
 
-  namespace = "istio-system"
+  namespace = "istio-gateway"
 
   dependency_update = true
   create_namespace  = true
   wait_for_jobs     = true
+
+  values = [
+    yamlencode(local.istio_ingress_gateway_values)
+  ]
 
   set {
     name  = "revision"
@@ -86,6 +71,6 @@ resource "helm_release" "istio_gateway" {
   }
 
   depends_on = [
-    helm_release.istio_cni
+    helm_release.istiod
   ]
 }
