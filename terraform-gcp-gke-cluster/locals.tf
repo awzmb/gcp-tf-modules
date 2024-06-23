@@ -13,8 +13,7 @@ locals {
 
   istio_ingress_gateway_endpoint_group = "private-istio-ingress-gateway"
 
-  istio_ingress_gateway_values = <<EOF
----
+  istio_ingress_gateway_values = <<YAML
 service:
   type: ClusterIP
   ports:
@@ -38,5 +37,5 @@ service:
   externalIPs: []
 labels:
   istio: private-ingressgateway
-EOF
+YAML
 }
