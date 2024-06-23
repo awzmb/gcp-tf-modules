@@ -83,7 +83,15 @@ resource "google_container_cluster" "default" {
   initial_node_count = var.num_nodes
 
   # enable GCS backed volumes
-  gcs_fuse_csi_driver_config = true
+  gcs_fuse_csi_driver_config {
+    enabled = true
+  }
+
+  # enable istio with mtls auth between services
+  istio_config {
+    disabled = false
+    auth     = "AUTH_MUTUAL_TLS"
+  }
 
   # enable cilium. if you want to use calico, enter
   # LEGACY_DATAPATH instead
