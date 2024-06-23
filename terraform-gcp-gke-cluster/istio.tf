@@ -72,11 +72,6 @@ resource "helm_release" "istio_gateway" {
   }
 
   set {
-    name  = "global.proxy.image"
-    value = "auto"
-  }
-
-  set {
     name  = "global.controlPlaneSecurityEnabled"
     value = "true"
   }
