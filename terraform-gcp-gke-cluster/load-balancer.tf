@@ -43,7 +43,7 @@ resource "google_compute_region_backend_service" "default" {
   # create backend for all three zones in the define region
   # TODO: use for_each
   backend {
-    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zone/${var.region}-a/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
+    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.region}-a/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
@@ -52,7 +52,7 @@ resource "google_compute_region_backend_service" "default" {
   }
 
   backend {
-    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zone/${var.region}-b/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
+    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.region}-b/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
@@ -61,7 +61,7 @@ resource "google_compute_region_backend_service" "default" {
   }
 
   backend {
-    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zone/${var.region}-c/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
+    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.region}-c/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
