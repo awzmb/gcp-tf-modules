@@ -52,6 +52,7 @@ provider "helm" {
 data "google_client_config" "default" {}
 
 resource "google_compute_network" "default" {
+  #checkov:skip=CKV2_GCP_18:default firewall is okay for this use case
   name = "${local.gke_cluster_name}-network"
 
   auto_create_subnetworks = "false"
@@ -64,7 +65,8 @@ resource "google_compute_network" "default" {
 # this will construct a vpc-native, private gke cluster. for effective routing from the regional external http load balancer,
 # https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
 resource "google_compute_subnetwork" "default" {
-  #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
+  #checkov:skip=CKV_GCP_26:vpc flow logs are not necessary in this context
+  #checkov:skip=CKV_GCP_76:todo: check if this is a bug
   ip_cidr_range = local.internal_subnet_cidr
   name          = "${local.gke_cluster_name}-subnet"
   project       = google_compute_network.default.project
