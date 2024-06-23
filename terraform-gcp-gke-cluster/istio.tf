@@ -57,7 +57,31 @@ resource "helm_release" "istio_gateway" {
   wait_for_jobs     = true
 
   values = [
-    yamlencode(local.istio_ingress_gateway_values)
+    <<EOF
+service:
+  type: ClusterIP
+  ports:
+    - name: status-port
+      port: 15021
+      protocol: TCP
+      targetPort: 15021
+    - name: http2
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  annotations:
+    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group}"}}}'
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy: ""
+  externalIPs: []
+labels:
+  istio: private-ingressgateway
+EOF
   ]
 
   set {

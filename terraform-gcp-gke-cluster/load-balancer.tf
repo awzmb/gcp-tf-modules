@@ -41,7 +41,7 @@ resource "google_compute_region_backend_service" "default" {
   ]
 
   backend {
-    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/regions/${var.region}/networkEndpointGroups/private-istio-ingress-gateway"
+    group           = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/regions/${var.region}/networkEndpointGroups/${local.istio_ingress_gateway_endpoint_group}"
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
