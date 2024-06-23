@@ -57,11 +57,8 @@ resource "google_compute_network" "default" {
   routing_mode = "REGIONAL"
 }
 
-# This will construct a VPC-native, private GKE cluster. For effective routing from the Regional External HTTP Load Balancer,
-# having the VPC-native cluster is needed to make Gloo Edge's Envoy gateway-proxy pods routable via a standalone NEG.
-# See links in the comments below for specifics. This page is a good place to understand the overall solution:
+# this will construct a vpc-native, private gke cluster. for effective routing from the regional external http load balancer,
 # https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
-
 resource "google_compute_subnetwork" "default" {
   #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
   ip_cidr_range = local.internal_subnet_cidr
@@ -84,19 +81,29 @@ resource "google_container_cluster" "default" {
   name               = local.gke_cluster_name
   location           = var.region
   initial_node_count = var.num_nodes
-  # More info on the VPC native cluster: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg#create_a-native_cluster
+
+  # enable GCS backed volumes
+  gcs_fuse_csi_driver_config = true
+
+  # enable cilium. if you want to use calico, enter
+  # LEGACY_DATAPATH instead
+  datapath_provider = ADVANCED_DATAPATH
+
   networking_mode = "VPC_NATIVE"
   network         = google_compute_network.default.name
   subnetwork      = google_compute_subnetwork.default.name
-  # Disable the Google Cloud Logging service because you may overrun the Logging free tier allocation, and it may be expensive
+
+  # disable the google cloud logging service because you may overrun the logging free tier allocation, and it may be expensive
   logging_service = "none"
 
   node_config {
-    # more info on spot vms with gke https://cloud.google.com/kubernetes-engine/docs/how-to/spot-vms#create_a_cluster_with_enabled
+    # spot instances to decreste pricing to a minimum (when using in production
+    # use at minimum 9 nodes and make sure your important deployments have enough
+    # pods distributed over those nodes)
     spot         = true
     machine_type = var.machine_type
     disk_size_gb = var.disk_size
-    tags         = ["${local.gke_cluster_name}"]
+    tags         = [local.gke_cluster_name]
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
       "https://www.googleapis.com/auth/trace.append",
@@ -123,8 +130,8 @@ resource "google_container_cluster" "default" {
   }
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block  = "5.0.0.0/16"
-    services_ipv4_cidr_block = "5.1.0.0/16"
+    cluster_ipv4_cidr_block  = local.cluster_ipv4_cidr_block
+    services_ipv4_cidr_block = local.services_ipv4_cidr_block
   }
 
   default_snat_status {
@@ -141,6 +148,7 @@ resource "google_container_cluster" "default" {
     }
   }
 
+  # allow cluster deletion
   deletion_protection = false
 }
 
@@ -153,7 +161,7 @@ resource "time_sleep" "wait_for_kube" {
 resource "null_resource" "local_k8s_context" {
   depends_on = [time_sleep.wait_for_kube]
   provisioner "local-exec" {
-    # Update your local gcloud and kubectl credentials for the newly created cluster
+    # update your local gcloud and kubectl credentials for the newly created cluster
     command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --region=${var.region} && break || sleep 60; done"
   }
 }
