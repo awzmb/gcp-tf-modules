@@ -94,6 +94,11 @@ EOF
   }
 
   set {
+    name  = "global.proxy.image"
+    value = "proxyv2"
+  }
+
+  set {
     name  = "global.controlPlaneSecurityEnabled"
     value = "true"
   }
