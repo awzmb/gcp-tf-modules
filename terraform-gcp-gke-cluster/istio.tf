@@ -42,24 +42,24 @@ resource "helm_release" "istiod" {
   ]
 }
 
-#resource "helm_release" "istio_cni" {
-#count = var.enable_istio ? 1 : 0
+resource "helm_release" "istio_cni" {
+  count = var.enable_istio ? 1 : 0
 
-#name       = "istio-cni"
-#repository = "https://istio-release.storage.googleapis.com/charts"
-#chart      = "cni"
-#version    = local.istio_version
+  name       = "istio-cni"
+  repository = "https://istio-release.storage.googleapis.com/charts"
+  chart      = "cni"
+  version    = local.istio_version
 
-#namespace = "istio-system"
+  namespace = "istio-system"
 
-#dependency_update = true
-#create_namespace  = true
-#wait_for_jobs     = true
+  dependency_update = true
+  create_namespace  = true
+  wait_for_jobs     = true
 
-#depends_on = [
-#helm_release.istiod
-#]
-#}
+  depends_on = [
+    helm_release.istiod
+  ]
+}
 
 resource "helm_release" "istio_gateway" {
   count = var.enable_istio ? 1 : 0
