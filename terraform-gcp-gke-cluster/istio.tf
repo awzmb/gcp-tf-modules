@@ -13,10 +13,6 @@ resource "helm_release" "istio_base" {
   wait_for_jobs     = true
   atomic            = true
 
-  #values = [
-  #file("istio-values.yaml")
-  #]
-
   set {
     name  = "defaultRevision"
     value = "default"
@@ -100,7 +96,7 @@ EOF
   }
 
   set {
-    name  = "image.pullPolicy"
+    name  = "imagePullPolicy"
     value = "IfNotPresent"
   }
 
