@@ -116,6 +116,18 @@ resource "google_container_cluster" "default" {
     ]
   }
 
+  release_channel {
+    channel = var.release_channel
+  }
+
+  #workload_metadata_config {
+  #mode = "GKE_METADATA"
+  #}
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
   addons_config {
     # enable GCS backed volumes
     gcs_fuse_csi_driver_config {

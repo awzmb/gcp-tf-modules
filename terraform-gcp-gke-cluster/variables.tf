@@ -36,6 +36,17 @@ variable "domain" {
   type        = string
 }
 
+variable "release_channel" {
+  description = "Set the release channel for this cluster. Valid values are: REGULAR, RAPID and STABLE"
+  type        = string
+  default     = "REGULAR"
+
+  validation {
+    condition     = var.release_channel == "REGULAR" || var.release_channel == "RAPID" || var.release_channel == "STABLE"
+    error_message = "The release channel must bei either REGULAR, RAPID or STABLE."
+  }
+}
+
 variable "enable_istio" {
   description = "Enable deployment of istio"
   type        = bool
