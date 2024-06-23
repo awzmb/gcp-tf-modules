@@ -82,17 +82,6 @@ resource "google_container_cluster" "default" {
   location           = var.region
   initial_node_count = var.num_nodes
 
-  # enable GCS backed volumes
-  gcs_fuse_csi_driver_config {
-    enabled = true
-  }
-
-  # enable istio with mtls auth between services
-  istio_config {
-    disabled = false
-    auth     = "AUTH_MUTUAL_TLS"
-  }
-
   # enable cilium. if you want to use calico, enter
   # LEGACY_DATAPATH instead
   datapath_provider = "ADVANCED_DATAPATH"
@@ -123,6 +112,17 @@ resource "google_container_cluster" "default" {
   }
 
   addons_config {
+    # enable GCS backed volumes
+    gcs_fuse_csi_driver_config {
+      enabled = true
+    }
+
+    # enable istio with mtls auth between services
+    istio_config {
+      disabled = false
+      auth     = "AUTH_MUTUAL_TLS"
+    }
+
     http_load_balancing {
       # this needs to be enabled for the neg to be automatically created for the ingress gateway svc
       disabled = false
