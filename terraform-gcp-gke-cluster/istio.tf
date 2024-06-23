@@ -1,4 +1,6 @@
 resource "helm_release" "istio_base" {
+  count = var.enable_istio ? 1 : 0
+
   name       = "istio-base"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "base"
@@ -22,6 +24,8 @@ resource "helm_release" "istio_base" {
 }
 
 resource "helm_release" "istiod" {
+  count = var.enable_istio ? 1 : 0
+
   name       = "istiod"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "istiod"
@@ -39,6 +43,8 @@ resource "helm_release" "istiod" {
 }
 
 resource "helm_release" "istio_cni" {
+  count = var.enable_istio ? 1 : 0
+
   name       = "istio-cni"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "cni"
@@ -54,7 +60,10 @@ resource "helm_release" "istio_cni" {
     helm_release.istiod
   ]
 }
+
 resource "helm_release" "istio_gateway" {
+  count = var.enable_istio ? 1 : 0
+
   name       = "istio-gateway"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"

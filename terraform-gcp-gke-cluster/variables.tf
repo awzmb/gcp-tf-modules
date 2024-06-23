@@ -35,3 +35,9 @@ variable "domain" {
   description = "Domain of the cluster"
   type        = string
 }
+
+variable "enable_istio" {
+  description = "Enable deployment of istio"
+  type        = bool
+  default     = true
+}
