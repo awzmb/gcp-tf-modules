@@ -36,10 +36,10 @@ data "google_compute_network_endpoint_group" "istio_ingress_gateway_endpoint_gro
 }
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
-resource "google_compute_region_backend_service" "default" {
-  name        = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
-  project     = google_compute_subnetwork.default.project
-  region      = google_compute_subnetwork.default.region
+resource "google_compute_backend_service" "default" {
+  name    = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
+  project = google_compute_subnetwork.default.project
+  #region      = google_compute_subnetwork.default.region
   protocol    = "HTTP"
   timeout_sec = 10
 
