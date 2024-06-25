@@ -70,7 +70,8 @@ service:
       protocol: TCP
       targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group_http}"}}, {"443":{"name": "${local.istio_ingress_gateway_endpoint_group_https}"}}}'
+    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group}"}}}'
+    cloud.google.com/neg-affinity: '{"zones": ["${var.region}-a", "${var.region}-b", "${var.region}-c"]}'
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
   externalTrafficPolicy: ""
