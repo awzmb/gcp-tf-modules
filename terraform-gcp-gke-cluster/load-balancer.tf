@@ -51,7 +51,7 @@ resource "google_compute_backend_service" "default" {
   ]
 
   backend {
-    group           = data.google_compute_network_endpoint_group.istio_ingress_gateway_endpoint_group
+    group           = data.google_compute_network_endpoint_group.istio_ingress_gateway_endpoint_group.id
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
