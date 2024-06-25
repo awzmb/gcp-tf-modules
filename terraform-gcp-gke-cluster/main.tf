@@ -99,15 +99,16 @@ resource "google_container_cluster" "default" {
   # disable the google cloud logging service because you may overrun the logging free tier allocation, and it may be expensive
   logging_service = "none"
 
+  # provision an autopilot cluster to make it free tier
+  # (applicable only once per billing account)
+  enable_autopilot = true
+
   node_config {
-    # spot instances to decreste pricing to a minimum (when using in production
-    # use at minimum 9 nodes and make sure your important deployments have enough
-    # pods distributed over those nodes)
-    spot            = true
-    machine_type    = var.machine_type
-    disk_size_gb    = var.disk_size
-    tags            = [local.gke_cluster_name]
-    service_account = google_service_account.gke_node.email
+    #spot = true
+    #machine_type    = var.machine_type
+    #disk_size_gb    = var.disk_size
+    tags = [local.gke_cluster_name]
+    #service_account = google_service_account.gke_node.email
   }
 
   release_channel {

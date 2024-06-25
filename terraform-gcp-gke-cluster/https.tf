@@ -53,8 +53,7 @@ resource "google_compute_region_url_map" "redirect" {
 }
 
 resource "google_compute_url_map" "default" {
-  name        = "url-map"
-  description = "a description"
+  name = "${local.gke_cluster_name}-url-map"
   #default_service = google_compute_backend_service.default.id
   default_service = google_compute_region_backend_service.default.id
 
