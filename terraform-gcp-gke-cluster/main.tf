@@ -126,12 +126,6 @@ resource "google_container_cluster" "default" {
       enabled = true
     }
 
-    # enable istio with mtls auth between services
-    istio_config {
-      disabled = false
-      auth     = "AUTH_MUTUAL_TLS"
-    }
-
     http_load_balancing {
       # this needs to be enabled for the neg to be automatically created for the ingress gateway svc
       disabled = false
