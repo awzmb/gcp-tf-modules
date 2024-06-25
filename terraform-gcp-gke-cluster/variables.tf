@@ -46,3 +46,9 @@ variable "release_channel" {
     error_message = "The release channel must bei either REGULAR, RAPID or STABLE."
   }
 }
+
+variable "enable_istio" {
+  description = "Enable deployment of istio"
+  type        = bool
+  default     = true
+}

@@ -1,4 +1,5 @@
 resource "helm_release" "istio_base" {
+  count = var.enable_istio ? 1 : 0
 
   name       = "istio-base"
   repository = "https://istio-release.storage.googleapis.com/charts"
@@ -19,6 +20,7 @@ resource "helm_release" "istio_base" {
 }
 
 resource "helm_release" "istiod" {
+  count = var.enable_istio ? 1 : 0
 
   name       = "istiod"
   repository = "https://istio-release.storage.googleapis.com/charts"
@@ -36,10 +38,10 @@ resource "helm_release" "istiod" {
   ]
 }
 
-resource "helm_release" "istio_gateways" {
-  for_each = toset(["${var.region}-a", "${var.region}-b", "${var.region}-c"])
+resource "helm_release" "istio_gateway" {
+  count = var.enable_istio ? 1 : 0
 
-  name       = "istio-gateway-${each.key}"
+  name       = "istio-gateway"
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
   version    = local.istio_version
@@ -68,8 +70,7 @@ service:
       protocol: TCP
       targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group_http}-${each.key}"}}}'
-    cloud.google.com/neg-affinity: '{"zones": ["${each.key}"]}'
+    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group_http}"}}}'
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
   externalTrafficPolicy: ""

@@ -29,9 +29,11 @@ resource "google_compute_subnetwork" "proxy" {
 data "google_compute_network_endpoint_group" "istio_ingress_gateway_endpoint_group" {
   name    = local.istio_ingress_gateway_endpoint_group
   project = var.project_id
+  # TODO: check why NEGs are always spawned in var.region-c
+  zone = "${var.region}-c"
 
   depends_on = [
-    helm_release.istio_gateways
+    helm_release.istio_gateway
   ]
 }
 
@@ -79,7 +81,7 @@ resource "google_compute_backend_service" "default" {
 
   # this cannot be deployed until the ingress gateway is deployed and the standalone neg is automatically created
   depends_on = [
-    helm_release.istio_gateways
+    helm_release.istio_gateway
   ]
 }
 
