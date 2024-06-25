@@ -99,9 +99,6 @@ resource "google_container_cluster" "default" {
   # allow net admin capabilities to spawn wireguard endpoints
   allow_net_admin = true
 
-  # disable the google cloud logging service because you may overrun the logging free tier allocation, and it may be expensive
-  logging_service = "none"
-
   # provision an autopilot cluster to make it free tier
   # (applicable only once per billing account)
   enable_autopilot = true
@@ -110,6 +107,12 @@ resource "google_container_cluster" "default" {
     network_tags {
       tags = [local.gke_cluster_name]
     }
+  }
+
+  logging_config {
+    enable_components = [
+      "SYSTEM_COMPONENTS"
+    ]
   }
 
   release_channel {
