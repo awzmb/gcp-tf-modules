@@ -25,6 +25,16 @@ resource "google_compute_subnetwork" "proxy" {
   ]
 }
 
+# get the endpoint group of the istio gateway
+data "google_compute_network_endpoint_group" "istio_ingress_gateway_endpoint_group" {
+  name    = local.istio_ingress_gateway_endpoint_group
+  project = var.project_id
+
+  depends_on = [
+    helm_release.istio_gateway
+  ]
+}
+
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
 resource "google_compute_region_backend_service" "default" {
   name        = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
@@ -41,7 +51,7 @@ resource "google_compute_region_backend_service" "default" {
   ]
 
   backend {
-    group           = local.istio_ingress_gateway_endpoint_group
+    group           = data.google_compute_network_endpoint_group.istio_ingress_gateway_endpoint_group
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
