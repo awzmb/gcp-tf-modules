@@ -31,7 +31,7 @@ data "google_compute_network_endpoint_group" "istio_ingress_gateway_endpoint_gro
   project = var.project_id
 
   depends_on = [
-    helm_release.istio_gateway
+    helm_release.istio_gateways
   ]
 }
 
@@ -79,7 +79,7 @@ resource "google_compute_backend_service" "default" {
 
   # this cannot be deployed until the ingress gateway is deployed and the standalone neg is automatically created
   depends_on = [
-    helm_release.istio_gateway
+    helm_release.istio_gateways
   ]
 }
 
