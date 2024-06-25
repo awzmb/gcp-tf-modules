@@ -96,6 +96,9 @@ resource "google_container_cluster" "default" {
   network         = google_compute_network.default.name
   subnetwork      = google_compute_subnetwork.default.name
 
+  # allow net admin capabilities to spawn wireguard endpoints
+  allow_net_admin = true
+
   # disable the google cloud logging service because you may overrun the logging free tier allocation, and it may be expensive
   logging_service = "none"
 
@@ -103,21 +106,15 @@ resource "google_container_cluster" "default" {
   # (applicable only once per billing account)
   enable_autopilot = true
 
-  node_config {
-    #spot = true
-    #machine_type    = var.machine_type
-    #disk_size_gb    = var.disk_size
-    tags = [local.gke_cluster_name]
-    #service_account = google_service_account.gke_node.email
+  node_pool_auto_config {
+    network_tags {
+      tags = [local.gke_cluster_name]
+    }
   }
 
   release_channel {
     channel = var.release_channel
   }
-
-  #workload_metadata_config {
-  #mode = "GKE_METADATA"
-  #}
 
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
@@ -185,4 +182,3 @@ resource "null_resource" "local_k8s_context" {
     command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --region=${var.region} && break || sleep 60; done"
   }
 }
-
