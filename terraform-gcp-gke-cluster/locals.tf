@@ -10,5 +10,7 @@ locals {
   cluster_ipv4_cidr_block  = "5.0.0.0/16"
   services_ipv4_cidr_block = "5.1.0.0/16"
 
-  istio_ingress_gateway_endpoint_group = "private-istio-ingress-gateway"
+  istio_ingress_gateway_endpoint_group       = "private-istio-ingress-gateway"
+  istio_ingress_gateway_endpoint_group_http  = "private-istio-ingress-gateway-http"
+  istio_ingress_gateway_endpoint_group_https = "private-istio-ingress-gateway-https"
 }
