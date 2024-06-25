@@ -70,7 +70,7 @@ service:
       protocol: TCP
       targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group}"}}}'
+    cloud.google.com/neg:'{"ingress": true}'
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
   externalTrafficPolicy: ""
@@ -88,11 +88,6 @@ EOF
   set {
     name  = "image.repository"
     value = "gcr.io/istio-release/proxyv2"
-  }
-
-  set {
-    name  = "image.tag"
-    value = local.istio_ingress_gateway_endpoint_group
   }
 
   set {
