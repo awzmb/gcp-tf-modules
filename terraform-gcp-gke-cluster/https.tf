@@ -121,4 +121,8 @@ resource "google_compute_region_target_https_proxy" "default" {
     #google_compute_region_ssl_certificate.default.id
     google_compute_managed_ssl_certificate.default.id
   ]
+
+  depends_on = [
+    google_compute_managed_ssl_certificate.default
+  ]
 }
