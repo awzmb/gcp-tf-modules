@@ -52,7 +52,7 @@ resource "google_compute_region_backend_service" "default" {
   ]
 
   backend {
-    group           = data.google_compute_region_network_endpoint_group.neg_http.id
+    #group           = data.google_compute_region_network_endpoint_group.neg_http.id
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
