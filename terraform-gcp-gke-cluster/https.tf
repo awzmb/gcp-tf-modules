@@ -52,10 +52,10 @@ resource "google_compute_url_map" "redirect" {
   }
 }
 
-resource "google_compute_region_url_map" "default" {
+resource "google_compute_url_map" "default" {
   name            = "${local.gke_cluster_name}-url-map"
   default_service = google_compute_region_backend_service.default.id
-  region          = google_compute_subnetwork.default.region
+  #region          = google_compute_subnetwork.default.region
 
   host_rule {
     hosts        = [var.domain]
@@ -115,7 +115,7 @@ resource "google_compute_target_https_proxy" "default" {
   project = google_compute_subnetwork.default.project
   #region  = google_compute_subnetwork.default.region
   #url_map = google_compute_region_url_map.default.id
-  url_map = google_compute_region_url_map.default.id
+  url_map = google_compute_url_map.default.id
 
   ssl_certificates = [
     #google_compute_region_ssl_certificate.default.id
