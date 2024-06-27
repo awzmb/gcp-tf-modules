@@ -51,14 +51,14 @@ resource "google_compute_region_backend_service" "default" {
     google_compute_region_health_check.default.id
   ]
 
-  backend {
-    #group           = data.google_compute_region_network_endpoint_group.neg_http.id
-    capacity_scaler = 1
-    balancing_mode  = "RATE"
+  #backend {
+  ##group           = data.google_compute_region_network_endpoint_group.neg_http.id
+  #capacity_scaler = 1
+  #balancing_mode  = "RATE"
 
-    # this is a reasonable max rate for an envoy proxy
-    max_rate_per_endpoint = 3500
-  }
+  ## this is a reasonable max rate for an envoy proxy
+  #max_rate_per_endpoint = 3500
+  #}
 
   circuit_breakers {
     max_retries = 5
