@@ -17,6 +17,9 @@ resource "google_compute_subnetwork" "proxy" {
   region        = var.region
   network       = google_compute_network.default.id
 
+  private_ip_google_access   = true
+  private_ipv6_google_access = true
+
   purpose = "REGIONAL_MANAGED_PROXY"
   role    = "ACTIVE"
 
@@ -26,15 +29,15 @@ resource "google_compute_subnetwork" "proxy" {
 }
 
 # get the endpoint group of the istio gateway
-data "google_compute_region_network_endpoint_group" "neg_http" {
-  name    = local.istio_ingress_gateway_endpoint_group_http
-  project = var.project_id
-  region  = var.region
+#data "google_compute_region_network_endpoint_group" "neg_http" {
+#name    = local.istio_ingress_gateway_endpoint_group_http
+#project = var.project_id
+#region  = var.region
 
-  depends_on = [
-    helm_release.istio_gateway
-  ]
-}
+#depends_on = [
+#helm_release.istio_gateway
+#]
+#}
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
 resource "google_compute_region_backend_service" "default" {
