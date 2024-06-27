@@ -86,6 +86,10 @@ resource "google_compute_http_health_check" "default" {
 #project     = google_compute_subnetwork.default.project
 #region      = google_compute_subnetwork.default.region
 
+#lifecycle {
+#create_before_destroy = true
+#}
+
 #managed {
 #domains = [var.domain]
 #}
