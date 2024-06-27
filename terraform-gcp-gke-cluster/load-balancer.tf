@@ -26,11 +26,10 @@ resource "google_compute_subnetwork" "proxy" {
 }
 
 # get the endpoint group of the istio gateway
-data "google_compute_network_endpoint_group" "istio_ingress_gateway_endpoint_group" {
-  name    = local.istio_ingress_gateway_endpoint_group
+data "google_compute_region_network_endpoint_group" "neg_http" {
+  name    = local.istio_ingress_gateway_endpoint_group_http
   project = var.project_id
-  # TODO: check why NEGs are always spawned in var.region-c
-  zone = "${var.region}-c"
+  region  = var.region
 
   depends_on = [
     helm_release.istio_gateway
@@ -38,10 +37,10 @@ data "google_compute_network_endpoint_group" "istio_ingress_gateway_endpoint_gro
 }
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
-resource "google_compute_backend_service" "default" {
-  name    = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
-  project = google_compute_subnetwork.default.project
-  #region      = google_compute_subnetwork.default.region
+resource "google_compute_region_backend_service" "default" {
+  name        = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
+  project     = google_compute_subnetwork.default.project
+  region      = google_compute_subnetwork.default.region
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -53,7 +52,7 @@ resource "google_compute_backend_service" "default" {
   ]
 
   backend {
-    group           = data.google_compute_network_endpoint_group.istio_ingress_gateway_endpoint_group.id
+    group           = data.google_compute_region_network_endpoint_group.neg_http.id
     capacity_scaler = 1
     balancing_mode  = "RATE"
 
