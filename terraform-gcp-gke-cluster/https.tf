@@ -113,7 +113,7 @@ resource "google_compute_managed_ssl_certificate" "default" {
 resource "google_compute_region_target_https_proxy" "default" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
-  region  = google_compute_subnetwork.default.region
+  #region  = google_compute_subnetwork.default.region
   #url_map = google_compute_region_url_map.default.id
   url_map = google_compute_region_url_map.default.id
 
