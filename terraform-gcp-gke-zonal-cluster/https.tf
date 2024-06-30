@@ -41,10 +41,10 @@ resource "google_compute_forwarding_rule" "https" {
 resource "google_compute_region_target_http_proxy" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-http-redirect"
   project = google_compute_subnetwork.default.project
-  url_map = google_compute_url_map.redirect.id
+  url_map = google_compute_region_url_map.redirect.id
 }
 
-resource "google_compute_url_map" "redirect" {
+resource "google_compute_region_url_map" "redirect" {
   name    = "${local.gke_cluster_name}-regional-layer7--xlb-map-http-redirect"
   project = google_compute_subnetwork.default.project
 
