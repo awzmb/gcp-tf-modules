@@ -102,14 +102,6 @@ resource "google_container_cluster" "default" {
 
   # security
   enable_shielded_nodes = true
-  network_policy {
-    provider = "PROVIDER_UNSPECIFIED"
-    enabled  = true
-  }
-
-  #authenticator_groups_config {
-  #security_group = []
-  #}
 
   binary_authorization {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
