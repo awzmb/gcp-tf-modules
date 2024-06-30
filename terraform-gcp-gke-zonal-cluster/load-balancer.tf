@@ -61,10 +61,6 @@ resource "google_compute_backend_service" "default" {
     max_rate_per_endpoint = 3500
   }
 
-  circuit_breakers {
-    max_retries = 5
-  }
-
   outlier_detection {
     consecutive_errors = 2
 
