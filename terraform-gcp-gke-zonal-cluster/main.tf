@@ -176,12 +176,12 @@ resource "google_container_cluster" "default" {
   }
 
   master_authorized_networks_config {
-    #cidr_blocks {
-    # because this is a private cluster, need to open access to the
-    # master nodes in order to connect with kubectl
-    #cidr_block   = "0.0.0.0/0"
-    #display_name = "World"
-    #}
+    cidr_blocks {
+      # because this is a private cluster, need to open access to the
+      # master nodes in order to connect with kubectl
+      cidr_block   = "0.0.0.0/0"
+      display_name = "World"
+    }
     gcp_public_cidrs_access_enabled = true
   }
 
