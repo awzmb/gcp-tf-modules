@@ -11,7 +11,7 @@ resource "google_compute_subnetwork" "proxy" {
   #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
 
   provider = google-beta
-  name     = "${var.project_id}-proxy-only-subnet"
+  name     = "${var.project_id}-${var.region}-proxy-only-subnet"
 
   ip_cidr_range = local.proxy_only_ipv4_cidr
   project       = google_compute_network.default.project
@@ -37,8 +37,8 @@ data "google_compute_network_endpoint_group" "neg_http" {
   ]
 }
 
-# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
-resource "google_compute_backend_service" "default" {
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_region_backend_service
+resource "google_compute_region_backend_service" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
   project = google_compute_subnetwork.default.project
 
@@ -49,7 +49,7 @@ resource "google_compute_backend_service" "default" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   health_checks = [
-    google_compute_health_check.default.id
+    google_compute_region_health_check.default.id
   ]
 
   backend {
@@ -59,6 +59,10 @@ resource "google_compute_backend_service" "default" {
 
     # this is a reasonable max rate for an envoy proxy
     max_rate_per_endpoint = 3500
+  }
+
+  circuit_breakers {
+    max_retries = 5
   }
 
   outlier_detection {
@@ -81,11 +85,11 @@ resource "google_compute_backend_service" "default" {
   ]
 }
 
-# https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_health_check
-resource "google_compute_health_check" "default" {
+# https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_region_health_check
+resource "google_compute_region_health_check" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
   project = google_compute_subnetwork.default.project
-  #region  = google_compute_subnetwork.default.region
+  region  = google_compute_subnetwork.default.region
 
   http_health_check {
     port_specification = "USE_SERVING_PORT"

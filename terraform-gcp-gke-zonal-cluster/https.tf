@@ -54,9 +54,9 @@ resource "google_compute_region_url_map" "redirect" {
   }
 }
 
-resource "google_compute_url_map" "default" {
+resource "google_compute_region_url_map" "default" {
   name            = "${local.gke_cluster_name}-url-map"
-  default_service = google_compute_backend_service.default.id
+  default_service = google_compute_region_backend_service.default.id
 
   host_rule {
     hosts        = [var.domain]
@@ -65,11 +65,11 @@ resource "google_compute_url_map" "default" {
 
   path_matcher {
     name            = "allpaths"
-    default_service = google_compute_backend_service.default.id
+    default_service = google_compute_region_backend_service.default.id
 
     path_rule {
       paths   = ["/*"]
-      service = google_compute_backend_service.default.id
+      service = google_compute_region_backend_service.default.id
     }
   }
 }
@@ -114,7 +114,7 @@ resource "google_compute_managed_ssl_certificate" "default" {
 resource "google_compute_target_https_proxy" "default" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
-  url_map = google_compute_url_map.default.id
+  url_map = google_compute_region_url_map.default.id
 
   ssl_certificates = [
     google_compute_managed_ssl_certificate.default.id
