@@ -15,7 +15,7 @@ resource "google_dns_managed_zone" "zone" {
   description = "Cloud DNS zone for ${var.dns_zone}"
 
   dnssec_config {
-    state = on
+    state = "on"
   }
 
   labels = var.labels
