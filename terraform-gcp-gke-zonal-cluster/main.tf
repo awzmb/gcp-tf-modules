@@ -111,9 +111,6 @@ resource "google_container_cluster" "default" {
   network         = google_compute_network.default.name
   subnetwork      = google_compute_subnetwork.default.name
 
-  # allow net admin capabilities to spawn wireguard endpoints
-  allow_net_admin = true
-
   node_config {
     # info on spot vms with gke:
     # https://cloud.google.com/kubernetes-engine/docs/how-to/spot-vms#create_a_cluster_with_enabled
