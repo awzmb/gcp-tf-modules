@@ -3,22 +3,23 @@
 # managed proxy deployment. More information on the Regional External HTTP Load Balancer can be found here:
 # https://cloud.google.com/load-balancing/docs/https#regional-connections
 
-# Subnet reserved for Regional External HTTP Load Balancers that use a managed Envoy proxy.
-# More information is available here: https://cloud.google.com/load-balancing/docs/https/proxy-only-subnets
+# subnet reserved for regional external http load balancers that use a managed envoy proxy.
+# more information is available here: https://cloud.google.com/load-balancing/docs/https/proxy-only-subnets
 resource "google_compute_subnetwork" "proxy" {
   #checkov:skip=CKV_GCP_76:private access is enabled
   #checkov:skip=CKV_GCP_74:not relevant in proxy-only subnet
   #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
 
   provider = google-beta
-  name     = "${var.project_id}-${var.region}-proxy-only-subnet"
+  name     = "${var.project_id}-proxy-only-subnet"
 
   ip_cidr_range = local.proxy_only_ipv4_cidr
   project       = google_compute_network.default.project
-  region        = var.region
   network       = google_compute_network.default.id
+  region        = var.region
 
-  purpose = "REGIONAL_MANAGED_PROXY"
+  #purpose = "REGIONAL_MANAGED_PROXY"
+  purpose = "GLOBAL_MANAGED_PROXY"
   role    = "ACTIVE"
 
   depends_on = [
@@ -37,8 +38,8 @@ data "google_compute_network_endpoint_group" "neg_http" {
   ]
 }
 
-# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_region_backend_service
-resource "google_compute_region_backend_service" "default" {
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_service
+resource "google_compute_backend_service" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
   project = google_compute_subnetwork.default.project
 
@@ -49,7 +50,7 @@ resource "google_compute_region_backend_service" "default" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   health_checks = [
-    google_compute_region_health_check.default.id
+    google_compute_health_check.default.id
   ]
 
   backend {
@@ -61,9 +62,9 @@ resource "google_compute_region_backend_service" "default" {
     max_rate_per_endpoint = 3500
   }
 
-  circuit_breakers {
-    max_retries = 5
-  }
+  #circuit_breakers {
+  #max_retries = 5
+  #}
 
   outlier_detection {
     consecutive_errors = 2
@@ -85,11 +86,11 @@ resource "google_compute_region_backend_service" "default" {
   ]
 }
 
-# https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_region_health_check
-resource "google_compute_region_health_check" "default" {
+# https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_health_check
+resource "google_compute_health_check" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
   project = google_compute_subnetwork.default.project
-  region  = google_compute_subnetwork.default.region
+  #region  = google_compute_subnetwork.default.region
 
   http_health_check {
     port_specification = "USE_SERVING_PORT"
@@ -109,10 +110,10 @@ resource "google_compute_region_health_check" "default" {
 resource "google_compute_address" "default" {
   name    = "${local.gke_cluster_name}-ip-address"
   project = google_compute_subnetwork.default.project
-  region  = google_compute_subnetwork.default.region
+  #region  = google_compute_subnetwork.default.region
 
-  # required to be standard for use with regional_managed_proxy
-  network_tier = "STANDARD"
+  # required to be standard for use with regional proxy
+  #network_tier = "STANDARD"
 }
 
 resource "google_compute_firewall" "default" {
