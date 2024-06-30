@@ -85,10 +85,11 @@ resource "google_container_cluster" "default" {
   #checkov:skip=CKV2_GCP_18:control plane should be public
   #checkov:skip=CKV2_GCP_65:we want to have separated RBAC from google groups
 
-  provider           = google-beta
-  project            = var.project_id
-  name               = local.gke_cluster_name
-  location           = var.region
+  provider = google-beta
+  project  = var.project_id
+  name     = local.gke_cluster_name
+  location = var.zone
+
   initial_node_count = var.num_nodes
 
   # enable cilium. if you want to use calico, enter
