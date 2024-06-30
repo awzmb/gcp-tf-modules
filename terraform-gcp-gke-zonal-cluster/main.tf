@@ -83,6 +83,8 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_container_cluster" "default" {
   #checkov:skip=CKV2_GCP_18:control plane should be public
+  #checkov:skip=CKV2_GCP_65:we want to have separated RBAC from google groups
+
   provider           = google-beta
   project            = var.project_id
   name               = local.gke_cluster_name
@@ -93,16 +95,32 @@ resource "google_container_cluster" "default" {
   # LEGACY_DATAPATH instead
   datapath_provider = "ADVANCED_DATAPATH"
 
+  # enable workooad identity
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
+  # security
+  enable_shielded_nodes = true
+  network_policy {
+    provider = "PROVIDER_UNSPECIFIED"
+    enabled  = true
+  }
+
+  #authenticator_groups_config {
+  #security_group = []
+  #}
+
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
+
   networking_mode = "VPC_NATIVE"
   network         = google_compute_network.default.name
   subnetwork      = google_compute_subnetwork.default.name
 
   # allow net admin capabilities to spawn wireguard endpoints
   allow_net_admin = true
-
-  # provision an autopilot cluster to make it free tier
-  # (applicable only once per billing account)
-  enable_autopilot = false
 
   node_config {
     # info on spot vms with gke:
@@ -119,6 +137,10 @@ resource "google_container_cluster" "default" {
       "https://www.googleapis.com/auth/devstorage.read_only",
       "https://www.googleapis.com/auth/servicecontrol",
     ]
+
+    shielded_instance_config {
+      enable_secure_boot = true
+    }
   }
 
   logging_config {
@@ -129,10 +151,6 @@ resource "google_container_cluster" "default" {
 
   release_channel {
     channel = var.release_channel
-  }
-
-  workload_identity_config {
-    workload_pool = "${var.project_id}.svc.id.goog"
   }
 
   addons_config {
@@ -169,12 +187,13 @@ resource "google_container_cluster" "default" {
   }
 
   master_authorized_networks_config {
-    cidr_blocks {
-      # because this is a private cluster, need to open access to the
-      # master nodes in order to connect with kubectl
-      cidr_block   = "0.0.0.0/0"
-      display_name = "World"
-    }
+    #cidr_blocks {
+    # because this is a private cluster, need to open access to the
+    # master nodes in order to connect with kubectl
+    #cidr_block   = "0.0.0.0/0"
+    #display_name = "World"
+    #}
+    gcp_public_cidrs_access_enabled = true
   }
 
   # allow cluster deletion

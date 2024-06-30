@@ -7,6 +7,7 @@
 # More information is available here: https://cloud.google.com/load-balancing/docs/https/proxy-only-subnets
 resource "google_compute_subnetwork" "proxy" {
   #checkov:skip=CKV_GCP_76:private access is enabled
+  #checkov:skip=CKV_GCP_74:not relevant in proxy-only subnet
   #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
 
   provider = google-beta
@@ -16,9 +17,6 @@ resource "google_compute_subnetwork" "proxy" {
   project       = google_compute_network.default.project
   region        = var.region
   network       = google_compute_network.default.id
-
-  private_ip_google_access   = true
-  private_ipv6_google_access = true
 
   purpose = "REGIONAL_MANAGED_PROXY"
   role    = "ACTIVE"
