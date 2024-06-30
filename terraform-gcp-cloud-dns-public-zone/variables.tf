@@ -8,12 +8,6 @@ variable "dns_zone" {
   type        = string
 }
 
-variable "tld_registration_name" {
-  description = "Setting this glues the dns zone to your top-level domain registration."
-  type        = string
-  default     = ""
-}
-
 variable "labels" {
   description = "A map of labels to assign to the resource."
   type        = map(string)
