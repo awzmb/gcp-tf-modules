@@ -8,7 +8,7 @@ resource "google_compute_forwarding_rule" "redirect" {
 
   ip_protocol  = "TCP"
   port_range   = "80"
-  target       = google_compute_target_http_proxy.redirect.id
+  target       = google_compute_region_target_http_proxy.redirect.id
   network      = google_compute_network.default.id
   ip_address   = google_compute_address.default.id
   network_tier = "STANDARD"
@@ -38,7 +38,7 @@ resource "google_compute_forwarding_rule" "https" {
   ]
 }
 
-resource "google_compute_target_http_proxy" "redirect" {
+resource "google_compute_region_target_http_proxy" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-http-redirect"
   project = google_compute_subnetwork.default.project
   url_map = google_compute_url_map.redirect.id
