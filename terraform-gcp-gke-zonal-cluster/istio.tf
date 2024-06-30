@@ -70,8 +70,8 @@ service:
       protocol: TCP
       targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{},"443":{}}}'
-    controller.autoneg.dev/neg: '{"backend_services":{"80":[{"name":"${local.istio_ingress_gateway_endpoint_group_http_backend_service}","region":"europe-west4","max_rate_per_endpoint":100}],"443":[{"name":"${local.istio_ingress_gateway_endpoint_group_https_backend_service}","region":"${var.region}","max_connections_per_endpoint":1000}]}}'
+  cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group_http_backend_service}"},"443":{"name": "${local.istio_ingress_gateway_endpoint_group_https_backend_service}"}}}'
+    #controller.autoneg.dev/neg: '{"backend_services":{"80":[{"name":"${local.istio_ingress_gateway_endpoint_group_http_backend_service}","region":"europe-west4","max_rate_per_endpoint":100}],"443":[{"name":"${local.istio_ingress_gateway_endpoint_group_https_backend_service}","region":"${var.region}","max_connections_per_endpoint":1000}]}}'
 
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
