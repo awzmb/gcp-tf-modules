@@ -96,19 +96,19 @@ resource "google_compute_http_health_check" "default" {
 #}
 #}
 
-resource "google_compute_managed_ssl_certificate" "default" {
-  name        = "${local.gke_cluster_name}-certificate"
-  description = "SSL certificate for layer7--xlb-proxy-https"
-  project     = google_compute_subnetwork.default.project
+#resource "google_compute_managed_ssl_certificate" "default" {
+#name        = "${local.gke_cluster_name}-certificate"
+#description = "SSL certificate for layer7--xlb-proxy-https"
+#project     = google_compute_subnetwork.default.project
 
-  lifecycle {
-    create_before_destroy = true
-  }
+#lifecycle {
+#create_before_destroy = true
+#}
 
-  managed {
-    domains = [var.domain]
-  }
-}
+#managed {
+#domains = [var.domain]
+#}
+#}
 
 # https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_ssl_certificate#example-usage---ssl-certificate-target-https-proxies
 resource "google_compute_region_target_https_proxy" "default" {
@@ -116,11 +116,11 @@ resource "google_compute_region_target_https_proxy" "default" {
   project = google_compute_subnetwork.default.project
   url_map = google_compute_region_url_map.default.id
 
-  ssl_certificates = [
-    google_compute_managed_ssl_certificate.default.id
-  ]
+  #ssl_certificates = [
+  #google_compute_managed_ssl_certificate.default.id
+  #]
 
-  depends_on = [
-    google_compute_managed_ssl_certificate.default
-  ]
+  #depends_on = [
+  #google_compute_managed_ssl_certificate.default
+  #]
 }
