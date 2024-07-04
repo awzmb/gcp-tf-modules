@@ -8,6 +8,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "zone" {
+  description = "The zone to host the cluster and endpoints in."
+  type        = string
+}
+
 variable "region" {
   description = "The region to host the cluster in"
   type        = string

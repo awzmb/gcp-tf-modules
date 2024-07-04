@@ -176,6 +176,6 @@ resource "null_resource" "local_k8s_context" {
   depends_on = [time_sleep.wait_for_kube]
   provisioner "local-exec" {
     # update your local gcloud and kubectl credentials for the newly created cluster
-    command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --region=${var.region} && break || sleep 60; done"
+    command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --zone=${var.zone} && break || sleep 60; done"
   }
 }

@@ -1,10 +1,3 @@
-# This solution deploys a Regional External HTTP Load Balancer that routes traffic from the Internet to
-# the ingress gateway for the GKE Cluster. The Regional External HTTP Load Balancer uses Envoy as a
-# managed proxy deployment. More information on the Regional External HTTP Load Balancer can be found here:
-# https://cloud.google.com/load-balancing/docs/https#regional-connections
-
-# subnet reserved for regional external http load balancers that use a managed envoy proxy.
-# more information is available here: https://cloud.google.com/load-balancing/docs/https/proxy-only-subnets
 resource "google_compute_subnetwork" "proxy" {
   #checkov:skip=CKV_GCP_76:private access is enabled
   #checkov:skip=CKV_GCP_74:not relevant in proxy-only subnet
