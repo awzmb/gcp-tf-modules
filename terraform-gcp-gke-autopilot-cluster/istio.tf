@@ -65,12 +65,9 @@ service:
       port: 80
       protocol: TCP
       targetPort: 80
-    - name: https
-      port: 443
-      protocol: TCP
-      targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{"name": "${local.istio_ingress_gateway_endpoint_group_http}"},"443":{"name": "${local.istio_ingress_gateway_endpoint_group_https}"}}}'
+    cloud.google.com/neg: '{"exposed_ports": {"80":{}}}'
+    controller.autoneg.dev/neg: '{"backend_services":{"80":[{"name":"${local.istio_ingress_gateway_endpoint_group_http_backend_service}","max_rate_per_endpoint":100}]}'
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
   externalTrafficPolicy: ""
@@ -100,8 +97,9 @@ EOF
     value = "true"
   }
 
+  # deploy gateway after istiod and backend service have been deployed
   depends_on = [
-    helm_release.istiod
+    helm_release.istiod,
+    google_compute_backend_service.default
   ]
 }
-

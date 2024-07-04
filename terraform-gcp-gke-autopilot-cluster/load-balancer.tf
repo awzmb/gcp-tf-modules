@@ -20,20 +20,9 @@ resource "google_compute_subnetwork" "proxy" {
   ]
 }
 
-# get the endpoint group of the istio gateway
-data "google_compute_network_endpoint_group" "neg_http" {
-  name    = local.istio_ingress_gateway_endpoint_group_http
-  project = var.project_id
-  zone    = var.zone
-
-  depends_on = [
-    helm_release.istio_gateway
-  ]
-}
-
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_service
 resource "google_compute_backend_service" "default" {
-  name    = "${local.gke_cluster_name}-l7-xlb-backend-service-http"
+  name    = local.istio_ingress_gateway_endpoint_group_http_backend_service
   project = google_compute_subnetwork.default.project
 
   protocol    = "HTTP"
@@ -44,38 +33,6 @@ resource "google_compute_backend_service" "default" {
 
   health_checks = [
     google_compute_health_check.default.id
-  ]
-
-  backend {
-    group           = data.google_compute_network_endpoint_group.neg_http.id
-    capacity_scaler = 1
-    balancing_mode  = "RATE"
-
-    # this is a reasonable max rate for an envoy proxy
-    max_rate_per_endpoint = 3500
-  }
-
-  #circuit_breakers {
-  #max_retries = 5
-  #}
-
-  outlier_detection {
-    consecutive_errors = 2
-
-    base_ejection_time {
-      seconds = 30
-    }
-
-    interval {
-      seconds = 2
-    }
-
-    max_ejection_percent = 50
-  }
-
-  # this cannot be deployed until the ingress gateway is deployed and the standalone neg is automatically created
-  depends_on = [
-    helm_release.istio_gateway
   ]
 }
 
@@ -103,10 +60,6 @@ resource "google_compute_health_check" "default" {
 resource "google_compute_address" "default" {
   name    = "${local.gke_cluster_name}-ip-address"
   project = google_compute_subnetwork.default.project
-  #region  = google_compute_subnetwork.default.region
-
-  # required to be standard for use with regional proxy
-  #network_tier = "STANDARD"
 }
 
 resource "google_compute_firewall" "default" {
