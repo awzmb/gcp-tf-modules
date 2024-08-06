@@ -1,6 +1,7 @@
 resource "google_compute_forwarding_rule" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-http-redirect"
   project = google_compute_subnetwork.default.project
+  region  = var.region
 
   # scheme required for a regional external http load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"

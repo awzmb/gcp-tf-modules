@@ -18,7 +18,6 @@ resource "tls_self_signed_cert" "default" {
     organization = var.project_id
   }
 
-  validity_period_hours = 0
-  is_ca_certificate     = false
-  private_key_pem       = tls_private_key.default.private_key_pem
+  is_ca_certificate = false
+  private_key_pem   = tls_private_key.default.private_key_pem
 }
