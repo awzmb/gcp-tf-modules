@@ -11,8 +11,7 @@ resource "google_compute_subnetwork" "proxy" {
   network       = google_compute_network.default.id
   region        = var.region
 
-  #purpose = "REGIONAL_MANAGED_PROXY"
-  purpose = "GLOBAL_MANAGED_PROXY"
+  purpose = "REGIONAL_MANAGED_PROXY"
   role    = "ACTIVE"
 
   depends_on = [
@@ -43,7 +42,7 @@ resource "google_compute_region_backend_service" "default" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   health_checks = [
-    google_compute_health_check.default.id
+    google_compute_region_health_check.default.id
   ]
 
   backend {
@@ -79,8 +78,8 @@ resource "google_compute_region_backend_service" "default" {
   ]
 }
 
-# https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_health_check
-resource "google_compute_health_check" "default" {
+# https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_region_health_check
+resource "google_compute_region_health_check" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
   project = google_compute_subnetwork.default.project
   #region  = google_compute_subnetwork.default.region
