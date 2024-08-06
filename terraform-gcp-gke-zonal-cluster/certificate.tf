@@ -18,6 +18,7 @@ resource "tls_self_signed_cert" "default" {
     organization = var.project_id
   }
 
-  is_ca_certificate = false
-  private_key_pem   = tls_private_key.default.private_key_pem
+  validity_period_hours = 17280
+  is_ca_certificate     = false
+  private_key_pem       = tls_private_key.default.private_key_pem
 }
