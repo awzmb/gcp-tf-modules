@@ -3,7 +3,7 @@ resource "google_compute_forwarding_rule" "redirect" {
   project = google_compute_subnetwork.default.project
   region  = var.region
 
-  network    = google_compute_subnetwork.default.network
+  network    = google_compute_network.default.id
   subnetwork = google_compute_subnetwork.default.network
 
   # scheme required for a regional external http load balancer. this uses an external managed envoy proxy
