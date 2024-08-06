@@ -82,7 +82,7 @@ resource "google_compute_region_backend_service" "default" {
 resource "google_compute_region_health_check" "default" {
   name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
   project = google_compute_subnetwork.default.project
-  #region  = google_compute_subnetwork.default.region
+  region  = google_compute_subnetwork.default.region
 
   http_health_check {
     port_specification = "USE_SERVING_PORT"
@@ -102,10 +102,10 @@ resource "google_compute_region_health_check" "default" {
 resource "google_compute_address" "default" {
   name    = "${local.gke_cluster_name}-ip-address"
   project = google_compute_subnetwork.default.project
-  #region  = google_compute_subnetwork.default.region
+  region  = google_compute_subnetwork.default.region
 
   # required to be standard for use with regional proxy
-  #network_tier = "STANDARD"
+  network_tier = "STANDARD"
 }
 
 resource "google_compute_firewall" "default" {

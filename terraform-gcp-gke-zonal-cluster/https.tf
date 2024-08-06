@@ -4,10 +4,12 @@ resource "google_compute_forwarding_rule" "redirect" {
 
   # scheme required for a regional external http load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
+  network_tier          = "STANDARD"
 
   ip_protocol = "TCP"
   port_range  = "80"
   target      = google_compute_region_target_http_proxy.redirect.id
+  ip_address  = google_compute_address.default.id
 
   depends_on = [
     google_compute_subnetwork.proxy
@@ -20,10 +22,12 @@ resource "google_compute_forwarding_rule" "https" {
 
   # scheme required for a regional external https load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
+  network_tier          = "STANDARD"
 
   ip_protocol = "TCP"
   port_range  = "443"
   target      = google_compute_region_target_https_proxy.default.id
+  ip_address  = google_compute_address.default.id
 
   depends_on = [
     google_compute_subnetwork.proxy
@@ -33,12 +37,15 @@ resource "google_compute_forwarding_rule" "https" {
 resource "google_compute_region_target_http_proxy" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-http-redirect"
   project = google_compute_subnetwork.default.project
+  region  = var.region
+
   url_map = google_compute_region_url_map.redirect.id
 }
 
 resource "google_compute_region_url_map" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-map-http-redirect"
   project = google_compute_subnetwork.default.project
+  region  = var.region
 
   default_url_redirect {
     https_redirect = true
@@ -49,6 +56,7 @@ resource "google_compute_region_url_map" "redirect" {
 resource "google_compute_region_url_map" "default" {
   name            = "${local.gke_cluster_name}-url-map"
   default_service = google_compute_region_backend_service.default.id
+  region          = var.region
 
   host_rule {
     hosts        = [var.domain]
@@ -77,6 +85,7 @@ resource "google_compute_region_ssl_certificate" "default" {
   name        = "${local.gke_cluster_name}-xlb-certificate"
   description = "SSL certificate for layer7--xlb-proxy-https"
   project     = google_compute_subnetwork.default.project
+  region      = var.region
 
   certificate = tls_self_signed_cert.default.cert_pem
   private_key = tls_private_key.default.private_key_pem
@@ -90,6 +99,8 @@ resource "google_compute_region_ssl_certificate" "default" {
 resource "google_compute_region_target_https_proxy" "default" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
+  region  = var.region
+
   url_map = google_compute_region_url_map.default.id
 
   ssl_certificates = [
