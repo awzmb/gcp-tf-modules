@@ -11,7 +11,7 @@ resource "tls_self_signed_cert" "default" {
   ]
 
   dns_names    = [var.domain]
-  ip_addresses = ["127.0.0.1"]
+  ip_addresses = [google_compute_address.default.address]
 
   subject {
     common_name  = var.domain
