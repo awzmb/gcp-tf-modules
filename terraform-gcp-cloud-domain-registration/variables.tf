@@ -88,3 +88,8 @@ variable "phone_number" {
     error_message = "The phone_number variable must be a valid phone number."
   }
 }
+
+variable "name_servers" {
+  description = "The name servers to delegate the domain to."
+  type        = list(string)
+}
