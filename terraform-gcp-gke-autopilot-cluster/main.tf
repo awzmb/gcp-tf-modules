@@ -166,3 +166,39 @@ resource "null_resource" "local_k8s_context" {
     command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --zone=${var.zone} && break || sleep 60; done"
   }
 }
+
+# deploy istio via submodule to tackle the data object dependency
+# problem on the first deployment of the cluster.
+module "external_dns" {
+  source = "./submodules/external-dns"
+
+  cluster_name = google_container_cluster.default.name
+  region       = var.region
+  project_id   = var.project_id
+
+  external_dns_version = "0.14.2"
+
+  dns_zone_name = var.dns_zone_name
+
+  depends_on = [
+    google_container_cluster.default
+  ]
+}
+
+# deploy istio via submodule to tackle the data object dependency
+# problem on the first deployment of the cluster.
+module "istio" {
+  source = "./submodules/istio"
+
+  cluster_name = google_container_cluster.default.name
+  region       = var.region
+
+  istio_version = local.istio_version
+
+  http_backend_service_name  = local.istio_ingress_gateway_endpoint_group_http_backend_service
+  https_backend_service_name = local.istio_ingress_gateway_endpoint_group_https_backend_service
+
+  depends_on = [
+    google_container_cluster.default
+  ]
+}
