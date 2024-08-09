@@ -1,6 +1,8 @@
 locals {
   gke_cluster_name = "gke-${var.name}"
 
+  workload_identity_pool = "${var.project_id}.svc.id.goog"
+
   istio_version = "1.22.1"
 
   internal_subnet_cidr   = "10.0.0.0/24"

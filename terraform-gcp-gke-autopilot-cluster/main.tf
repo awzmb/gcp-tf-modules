@@ -107,7 +107,7 @@ resource "google_container_cluster" "default" {
   }
 
   workload_identity_config {
-    workload_pool = "${var.project_id}.svc.id.goog"
+    workload_pool = local.workload_identity_pool
   }
 
   addons_config {
