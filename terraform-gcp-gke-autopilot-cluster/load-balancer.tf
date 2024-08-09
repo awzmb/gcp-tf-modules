@@ -25,13 +25,13 @@ data "google_compute_network_endpoint_group" "neg_http" {
   project = var.project_id
 
   depends_on = [
-    module.istio
+    helm_release.istio_gateway
   ]
 }
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_service
 resource "google_compute_region_backend_service" "default" {
-  name    = local.istio_ingress_gateway_endpoint_group_http_backend_service
+  name    = local.http_backend_service_name
   project = google_compute_subnetwork.default.project
   region  = var.region
 

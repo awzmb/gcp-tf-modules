@@ -3,7 +3,8 @@ locals {
 
   workload_identity_pool = "${var.project_id}.svc.id.goog"
 
-  istio_version = "1.22.1"
+  istio_version        = "1.22.1"
+  external_dns_version = "1.14.5"
 
   internal_subnet_cidr   = "10.0.0.0/24"
   master_ipv4_cidr_block = "172.16.0.16/28"
@@ -17,6 +18,6 @@ locals {
   istio_ingress_gateway_endpoint_group_http  = "${local.istio_ingress_gateway_endpoint_group}-http"
   istio_ingress_gateway_endpoint_group_https = "${local.istio_ingress_gateway_endpoint_group}-https"
 
-  istio_ingress_gateway_endpoint_group_http_backend_service  = "${local.istio_ingress_gateway_endpoint_group_http}-backend-service"
-  istio_ingress_gateway_endpoint_group_https_backend_service = "${local.istio_ingress_gateway_endpoint_group_https}-backend-service"
+  http_backend_service_name  = "${local.istio_ingress_gateway_endpoint_group_http}-backend-service"
+  https_backend_service_name = "${local.istio_ingress_gateway_endpoint_group_https}-backend-service"
 }
