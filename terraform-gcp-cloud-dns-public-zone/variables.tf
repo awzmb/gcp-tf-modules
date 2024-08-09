@@ -24,3 +24,9 @@ variable "dns_records" {
   }))
   default = {}
 }
+
+variable "dnssec_enabled" {
+  description = "Enable DNSSEC for this zone."
+  type        = bool
+  default     = false
+}
