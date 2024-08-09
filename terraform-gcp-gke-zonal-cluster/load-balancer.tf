@@ -26,7 +26,7 @@ data "google_compute_network_endpoint_group" "neg_http" {
   zone    = var.zone
 
   depends_on = [
-    helm_release.istio_gateway
+    module.istio
   ]
 }
 
@@ -74,7 +74,7 @@ resource "google_compute_region_backend_service" "default" {
 
   # this cannot be deployed until the ingress gateway is deployed and the standalone neg is automatically created
   depends_on = [
-    helm_release.istio_gateway
+    module.istio
   ]
 }
 

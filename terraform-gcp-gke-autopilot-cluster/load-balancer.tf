@@ -20,16 +20,35 @@ resource "google_compute_subnetwork" "proxy" {
   ]
 }
 
+data "google_compute_network_endpoint_group" "neg_http" {
+  name    = local.istio_ingress_gateway_endpoint_group_http
+  project = var.project_id
+
+  depends_on = [
+    module.istio
+  ]
+}
+
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_service
-resource "google_compute_backend_service" "default" {
+resource "google_compute_region_backend_service" "default" {
   name    = local.istio_ingress_gateway_endpoint_group_http_backend_service
   project = google_compute_subnetwork.default.project
+  region  = var.region
 
   protocol    = "HTTP"
   timeout_sec = 10
 
   # scheme required for a regional external http load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  backend {
+    group           = data.google_compute_network_endpoint_group.neg_http.id
+    capacity_scaler = 1
+    balancing_mode  = "RATE"
+
+    # this is a reasonable max rate for an envoy proxy
+    max_rate_per_endpoint = 3500
+  }
 
   health_checks = [
     google_compute_health_check.default.id
