@@ -82,6 +82,12 @@ resource "kubernetes_cluster_role" "external_dns" {
   ]
 }
 
+resource "kubernetes_namespace" "external_dns" {
+  metadata {
+    name = "external-dns"
+  }
+}
+
 resource "kubernetes_cluster_role_binding" "external_dns" {
   metadata {
     name = "external-dns"
@@ -103,7 +109,7 @@ resource "kubernetes_cluster_role_binding" "external_dns" {
 resource "kubernetes_deployment" "external_dns" {
   metadata {
     name      = "external-dns"
-    namespace = "external-dns"
+    namespace = kubernetes_namespace.external_dns.metadata[0].name
   }
 
   spec {
@@ -142,6 +148,31 @@ resource "kubernetes_deployment" "external_dns" {
             "--policy=upsert-only",
             "--txt-owner-id=external-dns"
           ]
+
+          liveness_probe {
+            http_get {
+              path = "/healthz"
+              port = 7979
+            }
+            initial_delay_seconds = 30
+            period_seconds        = 10
+            failure_threshold     = 3
+            success_threshold     = 1
+            timeout_seconds       = 5
+          }
+
+          readiness_probe {
+            http_get {
+              path = "/healthz"
+              port = 7979
+            }
+            initial_delay_seconds = 5
+            period_seconds        = 10
+            failure_threshold     = 3
+            success_threshold     = 1
+            timeout_seconds       = 5
+          }
+
         }
 
         security_context {
@@ -160,33 +191,33 @@ resource "kubernetes_deployment" "external_dns" {
   ]
 }
 
-resource "helm_release" "external_dns" {
-  name       = "external-dns"
-  repository = "https://kubernetes-sigs.github.io/external-dns"
-  chart      = "external-dns"
-  version    = local.external_dns_version
+#resource "helm_release" "external_dns" {
+#name       = "external-dns"
+#repository = "https://kubernetes-sigs.github.io/external-dns"
+#chart      = "external-dns"
+#version    = local.external_dns_version
 
-  namespace = "external-dns"
+#namespace = "external-dns"
 
-  dependency_update = true
-  create_namespace  = true
-  wait_for_jobs     = true
-  atomic            = true
+#dependency_update = true
+#create_namespace  = true
+#wait_for_jobs     = true
+#atomic            = true
 
-  values = [
-    <<EOF
-extraArgs:
-  - --source=ingress
-  - --source=service
-  - --source=istio-gateway
-  - --source=virtualservice
-  - --domain-filter=${data.google_dns_managed_zone.dns_zone.dns_name}
-  - --provider=google
-  - --google-project=${var.project_id}
-  - --registry=txt
-  - --log-format=json
-  - --policy=upsert-only
-  - --txt-owner-id=external-dns
-EOF
-  ]
-}
+#values = [
+#<<EOF
+#extraArgs:
+#- --source=ingress
+#- --source=service
+#- --source=istio-gateway
+#- --source=virtualservice
+#- --domain-filter=${data.google_dns_managed_zone.dns_zone.dns_name}
+#- --provider=google
+#- --google-project=${var.project_id}
+#- --registry=txt
+#- --log-format=json
+#- --policy=upsert-only
+#- --txt-owner-id=external-dns
+#EOF
+#]
+#}
