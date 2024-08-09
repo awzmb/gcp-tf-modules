@@ -1,3 +1,7 @@
+data "google_dns_managed_zone" "dns_zone" {
+  name = var.dns_zone_name
+}
+
 resource "google_compute_forwarding_rule" "redirect" {
   name        = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-http-redirect"
   project     = google_compute_subnetwork.default.project
@@ -58,7 +62,7 @@ resource "google_compute_url_map" "default" {
   default_service = google_compute_region_backend_service.default.id
 
   host_rule {
-    hosts        = [var.domain]
+    hosts        = [data.google_dns_managed_zone.dns_zone.dns_name]
     path_matcher = "allpaths"
   }
 
@@ -90,7 +94,7 @@ resource "google_compute_managed_ssl_certificate" "default" {
   }
 
   managed {
-    domains = [var.domain]
+    domains = [data.google_dns_managed_zone.dns_zone.dns_name]
   }
 }
 

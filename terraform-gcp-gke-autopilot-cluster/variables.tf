@@ -36,8 +36,8 @@ variable "disk_size" {
   default     = 60
 }
 
-variable "domain" {
-  description = "Domain of the cluster."
+variable "dns_zone_name" {
+  description = "Name of the DNS zone the cluster is allowed create records in."
   type        = string
 }
 

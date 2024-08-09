@@ -40,6 +40,10 @@ data "google_container_cluster" "default" {
   location = var.region
 }
 
+data "google_dns_managed_zone" "dns_zone" {
+  name = var.dns_zone_name
+}
+
 provider "kubernetes" {
   host                   = data.google_container_cluster.default.endpoint
   token                  = data.google_client_config.default.access_token
@@ -64,13 +68,14 @@ resource "google_service_account" "external_dns" {
   project      = var.project_id
 }
 
+# custom role to manage DNS records in Cloud DNS
 resource "google_project_iam_custom_role" "manage_dns_records" {
-  description = "Based on: DNS Reader"
+  description = "Allows managing DNS records in Cloud DNS."
   permissions = [
     "dns.resourceRecordSets.list", "dns.resourceRecordSets.create", "dns.resourceRecordSets.delete",
     "dns.resourceRecordSets.update", "dns.changes.get", "dns.changes.create", "dns.managedZones.list"
   ]
-  project = local.project_id
+  project = var.project_id
   role_id = "manage-dns-records-${random_id.random_role_id_suffix.hex}"
   title   = "Manage DNS records"
 }
@@ -105,7 +110,7 @@ resource "kubernetes_cluster_role" "external_dns" {
     verbs      = ["list", "get", "watch"]
   }
 
-  # istio
+  # give external-dns the ability to watch istio resources
   rule {
     api_groups = ["networking.istio.io"]
     resources  = ["virtualservices", "gateways"]
@@ -130,7 +135,7 @@ resource "kubernetes_cluster_role_binding" "external_dns" {
     name      = kubernetes_cluster_role.external_dns.metadata[0].name
   }
 
-  subjects {
+  subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.external_dns.metadata[0].name
     namespace = kubernetes_service_account.external_dns.metadata[0].namespace
@@ -171,7 +176,7 @@ resource "kubernetes_deployment" "external_dns" {
             "--source=service",
             "--source=istio-gateway",
             "--source=virtualservice",
-            "--domain-filter=${var.domain}",
+            "--domain-filter=${data.google_dns_managed_zone.dns_zone.dns_name}",
             "--provider=google",
             "--google-project=${var.project_id}",
             "--registry=txt",

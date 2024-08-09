@@ -18,7 +18,7 @@ variable "external_dns_version" {
   type        = string
 }
 
-variable "dns_zone" {
-  description = "DNS zone to manage (should be identical to the cluster DNS zone)."
+variable "dns_zone_name" {
+  description = "DNS zone name to manage (should be identical to the cluster DNS zone)."
   type        = string
 }
