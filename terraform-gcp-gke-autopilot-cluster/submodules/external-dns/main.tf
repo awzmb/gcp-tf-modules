@@ -2,6 +2,16 @@ terraform {
   required_version = ">=1.3"
 
   required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.25.0, < 6"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.25.0, < 6"
+    }
+
     helm = {
       source  = "hashicorp/helm"
       version = ">= 2.10.0, < 3"
@@ -11,7 +21,16 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">= 2.30.0, < 3"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.6, < 4"
+    }
   }
+}
+
+resource "random_id" "random_role_id_suffix" {
+  byte_length = 4
 }
 
 data "google_client_config" "default" {}
@@ -40,11 +59,24 @@ provider "helm" {
 }
 
 resource "google_service_account" "external_dns" {
-  account_id = "external-dns"
+  account_id   = "external-dns"
+  display_name = "external-dns Service Account"
+  project      = var.project_id
+}
+
+resource "google_project_iam_custom_role" "manage_dns_records" {
+  description = "Based on: DNS Reader"
+  permissions = [
+    "dns.resourceRecordSets.list", "dns.resourceRecordSets.create", "dns.resourceRecordSets.delete",
+    "dns.resourceRecordSets.update", "dns.changes.get", "dns.changes.create", "dns.managedZones.list"
+  ]
+  project = local.project_id
+  role_id = "manage-dns-records-${random_id.random_role_id_suffix.hex}"
+  title   = "Manage DNS records"
 }
 
 resource "google_project_iam_member" "workload_identity_user_binding" {
-  project = "your-gcp-project-id" # Replace with your GCP project ID
+  project = var.project_id
   role    = "roles/iam.workloadIdentityUser"
   member  = "serviceAccount:${google_service_account.external_dns.name}.svc.id.goog[external-dns/external-dns]"
 }
@@ -132,7 +164,7 @@ resource "kubernetes_deployment" "external_dns" {
       spec {
         container {
           name  = "external-dns"
-          image = "k8s.gcr.io/external-dns/external-dns:v0.8.0"
+          image = "k8s.gcr.io/external-dns/external-dns:v${var.external_dns_version}"
 
           args = [
             "--source=ingress",
@@ -154,7 +186,7 @@ resource "kubernetes_deployment" "external_dns" {
           run_as_user = 65534
         }
 
-        service_account_name = "external-dns"
+        service_account_name = google_service_account.external_dns.name
       }
     }
   }
