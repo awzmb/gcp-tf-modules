@@ -17,3 +17,8 @@ output "dns_name" {
   description = "The DNS name for the managed zone (g.e. private.example.com)."
   value       = var.dns_zone
 }
+
+output "dns_records" {
+  description = "The DNS records that were created."
+  value       = google_dns_record_set.dns_records
+}

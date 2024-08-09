@@ -13,3 +13,14 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "dns_records" {
+  description = "A map of DNS records to create in the managed zone."
+  type = map(object({
+    name    = string
+    type    = string
+    ttl     = number
+    rrdatas = list(string)
+  }))
+  default = {}
+}
