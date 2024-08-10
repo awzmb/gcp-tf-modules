@@ -169,7 +169,6 @@ resource "kubernetes_deployment" "external_dns" {
             "--source=service",
             "--source=istio-gateway",
             "--source=istio-virtualservice",
-            "--source=gateway-httproute",
             "--domain-filter=${data.google_dns_managed_zone.dns_zone.dns_name}",
             "--provider=google",
             "--google-project=${var.project_id}",
