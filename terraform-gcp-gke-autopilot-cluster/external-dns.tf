@@ -31,13 +31,13 @@ resource "google_project_iam_custom_role" "manage_dns_records" {
     "dns.managedZones.list",
   ]
   project = var.project_id
-  role_id = "manage_dns_records_${random_id.random_role_id_suffix.hex}"
+  role_id = "ManageDNSRecords${random_id.random_role_id_suffix.hex}"
   title   = "Manage DNS records"
 }
 
 resource "google_project_iam_binding" "external_dns" {
   project = var.project_id
-  role    = google_project_iam_custom_role.manage_dns_records.role_id
+  role    = google_project_iam_custom_role.manage_dns_records.id
 
   members = [
     "serviceAccount:${google_service_account.external_dns.email}",

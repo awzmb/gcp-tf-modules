@@ -194,17 +194,17 @@ resource "google_compute_region_health_check" "default" {
   }
 }
 
-resource "google_compute_managed_ssl_certificate" "default" {
-  name        = "${local.gke_cluster_name}-certificate"
+resource "google_compute_region_ssl_certificate" "default" {
+  name        = "${local.gke_cluster_name}-xlb-certificate"
   description = "SSL certificate for layer7--xlb-proxy-https"
   project     = google_compute_subnetwork.default.project
+  region      = var.region
+
+  certificate = tls_self_signed_cert.default.cert_pem
+  private_key = tls_private_key.default.private_key_pem
 
   lifecycle {
     create_before_destroy = true
-  }
-
-  managed {
-    domains = [data.google_dns_managed_zone.dns_zone.dns_name]
   }
 }
 
@@ -216,10 +216,6 @@ resource "google_compute_region_target_https_proxy" "default" {
   url_map = google_compute_region_url_map.default.id
 
   ssl_certificates = [
-    google_compute_managed_ssl_certificate.default.id
-  ]
-
-  depends_on = [
-    google_compute_managed_ssl_certificate.default
+    google_compute_region_ssl_certificate.default.id
   ]
 }
