@@ -78,7 +78,14 @@ resource "kubernetes_cluster_role" "external_dns" {
     verbs      = ["list", "get", "watch"]
   }
 
-  # give external-dns the ability to watch istio resources
+  # watch gateway apis
+  rule {
+    api_groups = ["gateway.networking.k8s.io"]
+    resources  = ["gateways", "httproutes", "tlsroutes", "tcproutes", "udproutes"]
+    verbs      = ["list", "get", "watch"]
+  }
+
+  # watch istio resources
   rule {
     api_groups = ["networking.istio.io"]
     resources  = ["virtualservices", "gateways"]
