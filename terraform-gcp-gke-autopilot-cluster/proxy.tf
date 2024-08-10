@@ -12,7 +12,7 @@ resource "google_compute_subnetwork" "proxy" {
   ip_cidr_range = local.proxy_only_ipv4_cidr
   project       = google_compute_network.default.project
   network       = google_compute_network.default.id
-  #region        = var.region
+  region        = var.region
 
   purpose = "REGIONAL_MANAGED_PROXY"
   #purpose = "GLOBAL_MANAGED_PROXY"
@@ -32,8 +32,8 @@ resource "google_compute_subnetwork" "proxy" {
 #]
 #}
 
-# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_backend_service
-resource "google_compute_backend_service" "default" {
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
+resource "google_compute_region_backend_service" "default" {
   name    = local.http_backend_service_name
   project = google_compute_subnetwork.default.project
   #region  = var.region
@@ -161,7 +161,7 @@ resource "google_compute_region_url_map" "redirect" {
 
 resource "google_compute_region_url_map" "default" {
   name            = "${local.gke_cluster_name}-url-map"
-  default_service = google_compute_backend_service.default.id
+  default_service = google_compute_region_backend_service.default.id
   region          = google_compute_subnetwork.default.region
 
   host_rule {
@@ -171,11 +171,11 @@ resource "google_compute_region_url_map" "default" {
 
   path_matcher {
     name            = "allpaths"
-    default_service = google_compute_backend_service.default.id
+    default_service = google_compute_region_backend_service.default.id
 
     path_rule {
       paths   = ["/*"]
-      service = google_compute_backend_service.default.id
+      service = google_compute_region_backend_service.default.id
     }
   }
 }
