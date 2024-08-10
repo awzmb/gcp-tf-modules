@@ -18,7 +18,7 @@ resource "google_service_account" "external_dns" {
   project      = var.project_id
 }
 
-# custom role to manage DNS records in Cloud DNS
+## custom role to manage DNS records in Cloud DNS
 #resource "google_project_iam_custom_role" "manage_dns_records" {
 #description = "Allows managing DNS records in Cloud DNS."
 #permissions = [
@@ -38,14 +38,12 @@ resource "google_service_account" "external_dns" {
 #resource "google_project_iam_binding" "external_dns" {
 #project = var.project_id
 #role    = google_project_iam_custom_role.manage_dns_records.id
-
 #members = [google_service_account.external_dns.member]
 #}
 
 resource "google_project_iam_binding" "external_dns" {
   project = var.project_id
   role    = "roles/dns.admin"
-
   members = [google_service_account.external_dns.member]
 }
 
@@ -55,10 +53,20 @@ resource "google_service_account_iam_member" "external_dns_workload_identity" {
   member             = "serviceAccount:${var.project_id}.svc.id.goog[external-dns/external-dns]"
 }
 
+resource "kubernetes_namespace" "external_dns" {
+  metadata {
+    name = "external-dns"
+  }
+}
+
 resource "kubernetes_service_account" "external_dns" {
   metadata {
     name      = "external-dns"
-    namespace = "external-dns"
+    namespace = kubernetes_namespace.external_dns.metadata[0].name
+
+    annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.external_dns.email
+    }
   }
 
   depends_on = [
@@ -73,7 +81,7 @@ resource "kubernetes_cluster_role" "external_dns" {
 
   rule {
     api_groups = [""]
-    resources  = ["services", "endpoints", "pods"]
+    resources  = ["services", "endpoints", "pods", "nodes"]
     verbs      = ["list", "get", "watch"]
   }
 
@@ -97,27 +105,9 @@ resource "kubernetes_cluster_role" "external_dns" {
     verbs      = ["list", "get", "watch"]
   }
 
-  #rule {
-  #api_groups = [""]
-  #resources  = ["nodes", "namespaces"]
-  #verbs      = ["list", "get", "watch"]
-  #}
-
-  rule {
-    api_groups = [""]
-    resources  = ["nodes"]
-    verbs      = ["list", "get", "watch"]
-  }
-
   depends_on = [
     google_container_cluster.default
   ]
-}
-
-resource "kubernetes_namespace" "external_dns" {
-  metadata {
-    name = "external-dns"
-  }
 }
 
 resource "kubernetes_cluster_role_binding" "external_dns" {
@@ -139,7 +129,6 @@ resource "kubernetes_cluster_role_binding" "external_dns" {
 }
 
 resource "kubernetes_deployment" "external_dns" {
-  #checkov:skip=CKV_K8S_28:external-dns needs elevated permissions
   #checkov:skip=CKV_K8S_43:no digest for this image
   metadata {
     name      = "external-dns"
@@ -159,9 +148,10 @@ resource "kubernetes_deployment" "external_dns" {
 
     template {
       metadata {
-        labels = {
-          app = "external-dns"
-        }
+        #annotations = {
+        #"sidecar.istio.io/inject"        = "false"
+        #"iam.gke.io/gcp-service-account" = google_service_account.external_dns.email
+        #}
       }
 
       spec {
@@ -181,7 +171,8 @@ resource "kubernetes_deployment" "external_dns" {
             "--registry=txt",
             "--log-format=json",
             "--policy=upsert-only",
-            "--txt-owner-id=external-dns"
+            "--txt-owner-id=${var.project_id}",
+            "--log-level=debug",
           ]
 
           liveness_probe {
@@ -239,6 +230,9 @@ resource "kubernetes_deployment" "external_dns" {
   }
 
   depends_on = [
+    google_container_cluster.default,
+    google_service_account_iam_member.external_dns_workload_identity,
+    kubernetes_namespace.external_dns,
     kubernetes_service_account.external_dns,
     kubernetes_cluster_role_binding.external_dns,
   ]
