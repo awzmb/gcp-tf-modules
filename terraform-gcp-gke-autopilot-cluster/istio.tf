@@ -94,7 +94,7 @@ service:
       protocol: TCP
       targetPort: 443
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"80":{}},"443":{}}}}'
+    cloud.google.com/neg: '{"exposed_ports": {"80":{},"443":{}}}'
     controller.autoneg.dev/neg: '{"backend_services":{"80":[{"name":"${local.http_backend_service_name}","max_rate_per_endpoint":100}]},"443":[{"name":"${local.https_backend_service_name}","max_rate_per_endpoint":100}]}}'
   loadBalancerIP: ""
   loadBalancerSourceRanges: []

@@ -22,18 +22,23 @@ resource "google_service_account" "external_dns" {
 resource "google_project_iam_custom_role" "manage_dns_records" {
   description = "Allows managing DNS records in Cloud DNS."
   permissions = [
-    "dns.resourceRecordSets.list", "dns.resourceRecordSets.create", "dns.resourceRecordSets.delete",
-    "dns.resourceRecordSets.update", "dns.changes.get", "dns.changes.create", "dns.managedZones.list"
+    "dns.resourceRecordSets.list",
+    "dns.resourceRecordSets.create",
+    "dns.resourceRecordSets.delete",
+    "dns.resourceRecordSets.update",
+    "dns.changes.get",
+    "dns.changes.create",
+    "dns.managedZones.list",
   ]
   project = var.project_id
   role_id = "manage_dns_records_${random_id.random_role_id_suffix.hex}"
   title   = "Manage DNS records"
 }
 
-resource "google_project_iam_member" "workload_identity_user_binding" {
-  project = var.project_id
-  role    = "roles/iam.workloadIdentityUser"
-  member  = "serviceAccount:${google_service_account.external_dns.name}.svc.id.goog[external-dns/external-dns]"
+resource "google_service_account_iam_member" "external_dns_workload_identity" {
+  service_account_id = google_service_account.external_dns.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[external-dns/external-dns]"
 }
 
 resource "kubernetes_service_account" "external_dns" {
@@ -107,6 +112,8 @@ resource "kubernetes_cluster_role_binding" "external_dns" {
 }
 
 resource "kubernetes_deployment" "external_dns" {
+  #checkov:skip=CKV_K8S_28:external-dns needs elevated permissions
+  #checkov:skip=CKV_K8S_43:no digest for this image
   metadata {
     name      = "external-dns"
     namespace = kubernetes_namespace.external_dns.metadata[0].name
@@ -132,8 +139,9 @@ resource "kubernetes_deployment" "external_dns" {
 
       spec {
         container {
-          name  = "external-dns"
-          image = "k8s.gcr.io/external-dns/external-dns:v${local.external_dns_version}"
+          name              = "external-dns"
+          image             = "k8s.gcr.io/external-dns/external-dns:v${local.external_dns_version}"
+          image_pull_policy = "Always"
 
           args = [
             "--source=ingress",
@@ -173,14 +181,32 @@ resource "kubernetes_deployment" "external_dns" {
             timeout_seconds       = 5
           }
 
+          resources {
+            requests = {
+              cpu    = "100m"
+              memory = "100Mi"
+            }
+            limits = {
+              cpu    = "800m"
+              memory = "1024Mi"
+            }
+          }
+
+          security_context {
+            privileged                 = false
+            allow_privilege_escalation = false
+            read_only_root_filesystem  = true
+            run_as_non_root            = true
+            run_as_user                = 65532
+            run_as_group               = 65532
+
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
         }
 
-        security_context {
-          fs_group    = 65534
-          run_as_user = 65534
-        }
-
-        service_account_name = google_service_account.external_dns.name
+        service_account_name = google_service_account.external_dns.email
       }
     }
   }
