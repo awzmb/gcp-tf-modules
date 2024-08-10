@@ -94,8 +94,8 @@ resource "kubernetes_cluster_role" "external_dns" {
 
   rule {
     api_groups = [""]
-    resources  = ["nodes"]
-    verbs      = ["list", "get"]
+    resources  = ["nodes", "namespaces"]
+    verbs      = ["list", "get", "watch"]
   }
 
   depends_on = [
