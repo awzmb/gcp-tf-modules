@@ -14,9 +14,9 @@ resource "google_compute_subnetwork" "proxy" {
   network       = google_compute_network.default.id
   #region        = var.region
 
-  #purpose = "REGIONAL_MANAGED_PROXY"
-  purpose = "GLOBAL_MANAGED_PROXY"
-  role    = "ACTIVE"
+  purpose = "REGIONAL_MANAGED_PROXY"
+  #purpose = "GLOBAL_MANAGED_PROXY"
+  role = "ACTIVE"
 
   depends_on = [
     google_compute_network.default
@@ -103,48 +103,48 @@ resource "google_compute_firewall" "default" {
   direction = "INGRESS"
 }
 
-resource "google_compute_global_forwarding_rule" "redirect" {
-  name    = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-http-redirect"
-  project = google_compute_subnetwork.default.project
-  #region      = google_compute_subnetwork.default.region
+resource "google_compute_forwarding_rule" "redirect" {
+  name        = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-http-redirect"
+  project     = google_compute_subnetwork.default.project
+  region      = google_compute_subnetwork.default.region
   ip_protocol = "TCP"
 
   # scheme required for a external http load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "80"
-  target                = google_compute_target_http_proxy.redirect.id
-  #network               = google_compute_network.default.id
-  ip_address = google_compute_address.default.id
-  #network_tier          = "STANDARD"
+  target                = google_compute_region_target_http_proxy.redirect.id
+  network               = google_compute_network.default.id
+  ip_address            = google_compute_address.default.id
+  network_tier          = "STANDARD"
 
   depends_on = [
     google_compute_subnetwork.proxy
   ]
 }
 
-resource "google_compute_global_forwarding_rule" "https" {
-  name    = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-https"
-  project = google_compute_subnetwork.default.project
-  #region      = google_compute_subnetwork.default.region
+resource "google_compute_forwarding_rule" "https" {
+  name        = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-https"
+  project     = google_compute_subnetwork.default.project
+  region      = google_compute_subnetwork.default.region
   ip_protocol = "TCP"
 
   # scheme required for a external https load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "443"
-  target                = google_compute_target_https_proxy.default.id
-  #network               = google_compute_network.default.id
-  ip_address = google_compute_address.default.id
-  #network_tier          = "STANDARD"
+  target                = google_compute_region_target_https_proxy.default.id
+  network               = google_compute_network.default.id
+  ip_address            = google_compute_address.default.id
+  network_tier          = "STANDARD"
 
   depends_on = [
     google_compute_subnetwork.proxy
   ]
 }
 
-resource "google_compute_target_http_proxy" "redirect" {
+resource "google_compute_region_target_http_proxy" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-http-redirect"
   project = google_compute_subnetwork.default.project
-  #region  = google_compute_subnetwork.default.region
+  region  = google_compute_subnetwork.default.region
   url_map = google_compute_url_map.redirect.id
 }
 
@@ -200,9 +200,10 @@ resource "google_compute_managed_ssl_certificate" "default" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_ssl_certificate#example-usage---ssl-certificate-target-https-proxies
-resource "google_compute_target_https_proxy" "default" {
+resource "google_compute_region_target_https_proxy" "default" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
+  region  = google_compute_subnetwork.default.region
   url_map = google_compute_url_map.default.id
 
   ssl_certificates = [
