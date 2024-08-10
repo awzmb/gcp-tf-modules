@@ -145,12 +145,13 @@ resource "google_compute_region_target_http_proxy" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-http-redirect"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
-  url_map = google_compute_url_map.redirect.id
+  url_map = google_compute_region_url_map.redirect.id
 }
 
-resource "google_compute_url_map" "redirect" {
+resource "google_compute_region_url_map" "redirect" {
   name    = "${local.gke_cluster_name}-layer7--xlb-map-http-redirect"
   project = google_compute_subnetwork.default.project
+  region  = google_compute_subnetwork.default.region
 
   default_url_redirect {
     https_redirect = true
@@ -158,9 +159,10 @@ resource "google_compute_url_map" "redirect" {
   }
 }
 
-resource "google_compute_url_map" "default" {
+resource "google_compute_region_url_map" "default" {
   name            = "${local.gke_cluster_name}-url-map"
   default_service = google_compute_backend_service.default.id
+  region          = google_compute_subnetwork.default.region
 
   host_rule {
     hosts        = [data.google_dns_managed_zone.dns_zone.dns_name]
@@ -204,7 +206,7 @@ resource "google_compute_region_target_https_proxy" "default" {
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
-  url_map = google_compute_url_map.default.id
+  url_map = google_compute_region_url_map.default.id
 
   ssl_certificates = [
     google_compute_managed_ssl_certificate.default.id
