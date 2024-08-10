@@ -35,6 +35,15 @@ resource "google_project_iam_custom_role" "manage_dns_records" {
   title   = "Manage DNS records"
 }
 
+resource "google_project_iam_binding" "external_dns" {
+  project = var.project_id
+  role    = google_project_iam_custom_role.manage_dns_records.role_id
+
+  members = [
+    "serviceAccount:${google_service_account.external_dns.email}",
+  ]
+}
+
 resource "google_service_account_iam_member" "external_dns_workload_identity" {
   service_account_id = google_service_account.external_dns.id
   role               = "roles/iam.workloadIdentityUser"
@@ -140,14 +149,15 @@ resource "kubernetes_deployment" "external_dns" {
       spec {
         container {
           name              = "external-dns"
-          image             = "k8s.gcr.io/external-dns/external-dns:v${local.external_dns_version}"
+          image             = "registry.k8s.io/external-dns/external-dns:v${local.external_dns_version}"
           image_pull_policy = "Always"
 
           args = [
             "--source=ingress",
             "--source=service",
             "--source=istio-gateway",
-            "--source=virtualservice",
+            "--source=istio-virtualservice",
+            "--source=gateway-httproute",
             "--domain-filter=${data.google_dns_managed_zone.dns_zone.dns_name}",
             "--provider=google",
             "--google-project=${var.project_id}",

@@ -80,8 +80,9 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_address" "default" {
-  name    = "${local.gke_cluster_name}-ip-address"
-  project = google_compute_subnetwork.default.project
+  name         = "${local.gke_cluster_name}-ip-address"
+  project      = google_compute_subnetwork.default.project
+  network_tier = "STANDARD"
 }
 
 resource "google_compute_firewall" "default" {
