@@ -54,30 +54,30 @@ resource "google_compute_region_backend_service" "default" {
   #}
 
   health_checks = [
-    google_compute_health_check.default.id
+    google_compute_region_health_check.default.id
   ]
 }
 
 # https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_health_check
-resource "google_compute_health_check" "default" {
-  name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
-  project = google_compute_subnetwork.default.project
-  #region  = google_compute_subnetwork.default.region
+#resource "google_compute_health_check" "default" {
+#name    = "${local.gke_cluster_name}-l7-xlb-basic-check-http"
+#project = google_compute_subnetwork.default.project
+#region  = google_compute_subnetwork.default.region
 
-  http_health_check {
-    port_specification = "USE_SERVING_PORT"
-    request_path       = "/"
-  }
+#region_health_check {
+#port_specification = "USE_SERVING_PORT"
+#request_path       = "/"
+#}
 
-  timeout_sec         = 1
-  check_interval_sec  = 3
-  healthy_threshold   = 1
-  unhealthy_threshold = 1
+#timeout_sec         = 1
+#check_interval_sec  = 3
+#healthy_threshold   = 1
+#unhealthy_threshold = 1
 
-  depends_on = [
-    google_compute_firewall.default
-  ]
-}
+#depends_on = [
+#google_compute_firewall.default
+#]
+#}
 
 resource "google_compute_address" "default" {
   name         = "${local.gke_cluster_name}-ip-address"
@@ -181,11 +181,17 @@ resource "google_compute_region_url_map" "default" {
   }
 }
 
-resource "google_compute_http_health_check" "default" {
-  name               = "${local.gke_cluster_name}-http-health-check"
-  request_path       = "/"
-  check_interval_sec = 1
+resource "google_compute_region_health_check" "default" {
+  name    = "${local.gke_cluster_name}-http-health-check"
+  project = google_compute_subnetwork.default.project
+  region  = google_compute_subnetwork.default.region
+
   timeout_sec        = 1
+  check_interval_sec = 1
+
+  tcp_health_check {
+    port = "80"
+  }
 }
 
 resource "google_compute_managed_ssl_certificate" "default" {
