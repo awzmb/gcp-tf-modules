@@ -19,29 +19,34 @@ resource "google_service_account" "external_dns" {
 }
 
 # custom role to manage DNS records in Cloud DNS
-resource "google_project_iam_custom_role" "manage_dns_records" {
-  description = "Allows managing DNS records in Cloud DNS."
-  permissions = [
-    "dns.resourceRecordSets.list",
-    "dns.resourceRecordSets.create",
-    "dns.resourceRecordSets.delete",
-    "dns.resourceRecordSets.update",
-    "dns.changes.get",
-    "dns.changes.create",
-    "dns.managedZones.list",
-  ]
-  project = var.project_id
-  role_id = "ManageDNSRecords${random_id.random_role_id_suffix.hex}"
-  title   = "Manage DNS records"
-}
+#resource "google_project_iam_custom_role" "manage_dns_records" {
+#description = "Allows managing DNS records in Cloud DNS."
+#permissions = [
+#"dns.resourceRecordSets.list",
+#"dns.resourceRecordSets.create",
+#"dns.resourceRecordSets.delete",
+#"dns.resourceRecordSets.update",
+#"dns.changes.get",
+#"dns.changes.create",
+#"dns.managedZones.list",
+#]
+#project = var.project_id
+#role_id = "ManageDNSRecords${random_id.random_role_id_suffix.hex}"
+#title   = "Manage DNS records"
+#}
+
+#resource "google_project_iam_binding" "external_dns" {
+#project = var.project_id
+#role    = google_project_iam_custom_role.manage_dns_records.id
+
+#members = [google_service_account.external_dns.member]
+#}
 
 resource "google_project_iam_binding" "external_dns" {
   project = var.project_id
-  role    = google_project_iam_custom_role.manage_dns_records.id
+  role    = "roles/dns.admin"
 
-  members = [
-    "serviceAccount:${google_service_account.external_dns.email}",
-  ]
+  members = [google_service_account.external_dns.member]
 }
 
 resource "google_service_account_iam_member" "external_dns_workload_identity" {
