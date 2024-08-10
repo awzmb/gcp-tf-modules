@@ -81,7 +81,7 @@ resource "kubernetes_cluster_role" "external_dns" {
 
   rule {
     api_groups = [""]
-    resources  = ["services", "endpoints", "pods", "nodes"]
+    resources  = ["services", "endpoints", "pods", "nodes", "namespaces"]
     verbs      = ["list", "get", "watch"]
   }
 
@@ -148,10 +148,14 @@ resource "kubernetes_deployment" "external_dns" {
 
     template {
       metadata {
-        #annotations = {
-        #"sidecar.istio.io/inject"        = "false"
-        #"iam.gke.io/gcp-service-account" = google_service_account.external_dns.email
-        #}
+        labels = {
+          app = "external-dns"
+        }
+
+        annotations = {
+          "sidecar.istio.io/inject"        = "false"
+          "iam.gke.io/gcp-service-account" = google_service_account.external_dns.email
+        }
       }
 
       spec {
