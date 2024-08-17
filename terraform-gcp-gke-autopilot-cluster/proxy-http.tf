@@ -1,42 +1,10 @@
-data "google_dns_managed_zone" "dns_zone" {
-  name = var.dns_zone_name
-}
-resource "google_compute_subnetwork" "proxy" {
-  #checkov:skip=CKV_GCP_76:private access is enabled
-  #checkov:skip=CKV_GCP_74:not relevant in proxy-only subnet
-  #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
-
-  provider = google-beta
-  name     = "${var.project_id}-proxy-only-subnet"
-
-  ip_cidr_range = local.proxy_only_ipv4_cidr
-  project       = google_compute_network.default.project
-  network       = google_compute_network.default.id
-  region        = var.region
-
-  purpose = "REGIONAL_MANAGED_PROXY"
-  #purpose = "GLOBAL_MANAGED_PROXY"
-  role = "ACTIVE"
-
-  depends_on = [
-    google_compute_network.default
-  ]
-}
-
-#data "google_compute_network_endpoint_group" "neg_http" {
-#name    = local.istio_ingress_gateway_endpoint_group_http
-#project = var.project_id
-
-#depends_on = [
-#helm_release.istio_gateway
-#]
-#}
-
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service
-resource "google_compute_region_backend_service" "default" {
+resource "google_compute_region_backend_service" "http" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name    = local.http_backend_service_name
   project = google_compute_subnetwork.default.project
-  #region  = var.region
+  region  = var.region
 
   protocol    = "HTTP"
   timeout_sec = 10
@@ -54,7 +22,7 @@ resource "google_compute_region_backend_service" "default" {
   #}
 
   health_checks = [
-    google_compute_region_health_check.default.id
+    google_compute_region_health_check.default[0].id
   ]
 }
 
@@ -79,32 +47,9 @@ resource "google_compute_region_backend_service" "default" {
 #]
 #}
 
-resource "google_compute_address" "default" {
-  name         = "${local.gke_cluster_name}-ip-address"
-  project      = google_compute_subnetwork.default.project
-  network_tier = "STANDARD"
-}
-
-resource "google_compute_firewall" "default" {
-  name    = "${local.gke_cluster_name}-fw-allow-health-check-and-proxy"
-  network = google_compute_network.default.id
-  project = google_compute_network.default.project
-  # allow for ingress from the health checks and the managed envoy proxy. for more information, see:
-  # https://cloud.google.com/load-balancing/docs/https#target-proxies
-  source_ranges = ["130.211.0.0/22", "35.191.0.0/16", local.proxy_only_ipv4_cidr]
-
-  allow {
-    protocol = "tcp"
-  }
-
-  target_tags = [
-    local.gke_cluster_name
-  ]
-
-  direction = "INGRESS"
-}
-
 resource "google_compute_forwarding_rule" "redirect" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name        = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-http-redirect"
   project     = google_compute_subnetwork.default.project
   region      = google_compute_subnetwork.default.region
@@ -113,7 +58,7 @@ resource "google_compute_forwarding_rule" "redirect" {
   # scheme required for a external http load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "80"
-  target                = google_compute_region_target_http_proxy.redirect.id
+  target                = google_compute_region_target_http_proxy.redirect[0].id
   network               = google_compute_network.default.id
   ip_address            = google_compute_address.default.id
   network_tier          = "STANDARD"
@@ -124,6 +69,8 @@ resource "google_compute_forwarding_rule" "redirect" {
 }
 
 resource "google_compute_forwarding_rule" "https" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name        = "${local.gke_cluster_name}-layer7--xlb-forwarding-rule-https"
   project     = google_compute_subnetwork.default.project
   region      = google_compute_subnetwork.default.region
@@ -132,7 +79,7 @@ resource "google_compute_forwarding_rule" "https" {
   # scheme required for a external https load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "443"
-  target                = google_compute_region_target_https_proxy.default.id
+  target                = google_compute_region_target_https_proxy.default[0].id
   network               = google_compute_network.default.id
   ip_address            = google_compute_address.default.id
   network_tier          = "STANDARD"
@@ -143,13 +90,17 @@ resource "google_compute_forwarding_rule" "https" {
 }
 
 resource "google_compute_region_target_http_proxy" "redirect" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-http-redirect"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
-  url_map = google_compute_region_url_map.redirect.id
+  url_map = google_compute_region_url_map.redirect[0].id
 }
 
 resource "google_compute_region_url_map" "redirect" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name    = "${local.gke_cluster_name}-layer7--xlb-map-http-redirect"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
@@ -161,8 +112,10 @@ resource "google_compute_region_url_map" "redirect" {
 }
 
 resource "google_compute_region_url_map" "default" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name            = "${local.gke_cluster_name}-url-map"
-  default_service = google_compute_region_backend_service.default.id
+  default_service = google_compute_region_backend_service.http[0].id
   region          = google_compute_subnetwork.default.region
 
   host_rule {
@@ -172,16 +125,18 @@ resource "google_compute_region_url_map" "default" {
 
   path_matcher {
     name            = "allpaths"
-    default_service = google_compute_region_backend_service.default.id
+    default_service = google_compute_region_backend_service.http[0].id
 
     path_rule {
       paths   = ["/*"]
-      service = google_compute_region_backend_service.default.id
+      service = google_compute_region_backend_service.http[0].id
     }
   }
 }
 
 resource "google_compute_region_health_check" "default" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name    = "${local.gke_cluster_name}-http-health-check"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
@@ -195,13 +150,15 @@ resource "google_compute_region_health_check" "default" {
 }
 
 resource "google_compute_region_ssl_certificate" "default" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name        = "${local.gke_cluster_name}-xlb-certificate"
   description = "SSL certificate for layer7--xlb-proxy-https"
   project     = google_compute_subnetwork.default.project
   region      = var.region
 
-  certificate = tls_self_signed_cert.default.cert_pem
-  private_key = tls_private_key.default.private_key_pem
+  certificate = tls_self_signed_cert.default[0].cert_pem
+  private_key = tls_private_key.default[0].private_key_pem
 
   lifecycle {
     create_before_destroy = true
@@ -210,12 +167,14 @@ resource "google_compute_region_ssl_certificate" "default" {
 
 # https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_ssl_certificate#example-usage---ssl-certificate-target-https-proxies
 resource "google_compute_region_target_https_proxy" "default" {
+  count = var.proxy_mode == "HTTP" ? 1 : 0
+
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
-  url_map = google_compute_region_url_map.default.id
+  url_map = google_compute_region_url_map.default[0].id
 
   ssl_certificates = [
-    google_compute_region_ssl_certificate.default.id
+    google_compute_region_ssl_certificate.default[0].id
   ]
 }

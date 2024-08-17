@@ -3,11 +3,15 @@
 # only used for communication between the load balancer and
 # the envoy proxy not for the actual domain.
 resource "tls_private_key" "default" {
+  count = var.proxy_mode == "TCP" ? 1 : 0
+
   algorithm = "RSA"
   rsa_bits  = 2048
 }
 
 resource "tls_self_signed_cert" "default" {
+  count = var.proxy_mode == "TCP" ? 1 : 0
+
   allowed_uses = [
     "key_encipherment",
     "digital_signature",
@@ -24,5 +28,5 @@ resource "tls_self_signed_cert" "default" {
 
   validity_period_hours = 17280
   is_ca_certificate     = false
-  private_key_pem       = tls_private_key.default.private_key_pem
+  private_key_pem       = tls_private_key.default[0].private_key_pem
 }

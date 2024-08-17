@@ -41,6 +41,10 @@ terraform {
 
 data "google_client_config" "default" {}
 
+data "google_dns_managed_zone" "dns_zone" {
+  name = var.dns_zone_name
+}
+
 resource "random_id" "random_role_id_suffix" {
   byte_length = 2
 }
@@ -90,7 +94,37 @@ resource "google_compute_subnetwork" "default" {
   ]
 }
 
+resource "google_compute_subnetwork" "proxy" {
+  #checkov:skip=CKV_GCP_76:private access is enabled
+  #checkov:skip=CKV_GCP_74:not relevant in proxy-only subnet
+  #checkov:skip=CKV_GCP_26:VPC flow logs are not necessary in this context
+
+  provider = google-beta
+  name     = "${var.project_id}-proxy-only-subnet"
+
+  ip_cidr_range = local.proxy_only_ipv4_cidr
+  project       = google_compute_network.default.project
+  network       = google_compute_network.default.id
+  region        = var.region
+
+  purpose = "REGIONAL_MANAGED_PROXY"
+  #purpose = "GLOBAL_MANAGED_PROXY"
+  role = "ACTIVE"
+
+  depends_on = [
+    google_compute_network.default
+  ]
+}
+
+resource "google_compute_address" "default" {
+  name         = "${local.gke_cluster_name}-ip-address"
+  project      = google_compute_subnetwork.default.project
+  network_tier = "STANDARD"
+}
+
 resource "google_container_cluster" "default" {
+  #checkov:skip=CKV_GCP_12:nework policy is active
+  #checkov:skip=CKV_GCP_18:public access is necessary for this setup
   provider           = google-beta
   project            = var.project_id
   name               = local.gke_cluster_name
@@ -188,3 +222,26 @@ resource "null_resource" "local_k8s_context" {
     command = "for i in 1 2 3 4 5; do gcloud container clusters get-credentials ${local.gke_cluster_name} --project=${var.project_id} --region=${var.region} && break || sleep 60; done"
   }
 }
+
+resource "google_compute_firewall" "default" {
+  count = var.proxy_mode == "TCP" ? 1 : 0
+
+  name    = "${local.gke_cluster_name}-fw-allow-health-check-and-proxy"
+  network = google_compute_network.default.id
+  project = google_compute_network.default.project
+
+  # allow for ingress from the health checks and the managed envoy proxy. for more information, see:
+  # https://cloud.google.com/load-balancing/docs/https#target-proxies
+  source_ranges = ["130.211.0.0/22", "35.191.0.0/16", local.proxy_only_ipv4_cidr]
+
+  allow {
+    protocol = "tcp"
+  }
+
+  target_tags = [
+    local.gke_cluster_name
+  ]
+
+  direction = "INGRESS"
+}
+

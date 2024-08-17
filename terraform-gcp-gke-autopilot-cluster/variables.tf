@@ -57,3 +57,8 @@ variable "enable_istio" {
   type        = bool
   default     = true
 }
+
+variable "proxy_mode" {
+  description = "Proxy mode to use. HTTP for http2/https load balancing, TCP for tcp passthrough (80/443) load balancing. Valid values are: HTTP, TCP."
+  type        = string
+}
