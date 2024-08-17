@@ -13,7 +13,7 @@ resource "google_compute_region_backend_service" "tcp" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   health_checks = [
-    google_compute_region_health_check.default[0].id
+    google_compute_region_health_check.tcp_http[0].id
   ]
 }
 
