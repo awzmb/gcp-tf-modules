@@ -79,7 +79,7 @@ resource "google_compute_forwarding_rule" "https" {
   # scheme required for a external https load balancer. this uses an external managed envoy proxy
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "443"
-  target                = google_compute_region_target_https_proxy.default[0].id
+  target                = google_compute_region_target_https_proxy.https[0].id
   network               = google_compute_network.default.id
   ip_address            = google_compute_address.default.id
   network_tier          = "STANDARD"
@@ -111,7 +111,7 @@ resource "google_compute_region_url_map" "redirect" {
   }
 }
 
-resource "google_compute_region_url_map" "default" {
+resource "google_compute_region_url_map" "http" {
   count = var.proxy_mode == "HTTP" ? 1 : 0
 
   name            = "${local.gke_cluster_name}-url-map"
@@ -166,13 +166,13 @@ resource "google_compute_region_ssl_certificate" "default" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_ssl_certificate#example-usage---ssl-certificate-target-https-proxies
-resource "google_compute_region_target_https_proxy" "default" {
+resource "google_compute_region_target_https_proxy" "https" {
   count = var.proxy_mode == "HTTP" ? 1 : 0
 
   name    = "${local.gke_cluster_name}-layer7--xlb-proxy-https"
   project = google_compute_subnetwork.default.project
   region  = google_compute_subnetwork.default.region
-  url_map = google_compute_region_url_map.default[0].id
+  url_map = google_compute_region_url_map.http[0].id
 
   ssl_certificates = [
     google_compute_region_ssl_certificate.default[0].id
