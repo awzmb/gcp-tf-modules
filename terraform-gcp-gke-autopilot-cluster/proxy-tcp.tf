@@ -54,9 +54,9 @@ resource "google_compute_forwarding_rule" "tcp_http" {
 
   port_range = "80"
 
-  target  = google_compute_region_target_tcp_proxy.tcp_target_proxy.id
-  network = google_compute_network.default.id
-  #ip_address   = google_compute_address.default.id
+  target       = google_compute_region_target_tcp_proxy.tcp_target_proxy.id
+  network      = google_compute_network.default.id
+  ip_address   = google_compute_address.default.id
   network_tier = "STANDARD"
 
   depends_on = [
@@ -77,9 +77,9 @@ resource "google_compute_forwarding_rule" "tcp_https" {
 
   port_range = "443"
 
-  target  = google_compute_region_target_tcp_proxy.tcp_target_proxy.id
-  network = google_compute_network.default.id
-  #ip_address   = google_compute_address.default.id
+  target       = google_compute_region_target_tcp_proxy.tcp_target_proxy.id
+  network      = google_compute_network.default.id
+  ip_address   = google_compute_address.default.id
   network_tier = "STANDARD"
 
   depends_on = [
